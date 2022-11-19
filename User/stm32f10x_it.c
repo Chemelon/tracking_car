@@ -134,6 +134,8 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
+#include "SysTick.h" 
+  TimingDelay_Decrement();
 }
 
 /******************************************************************************/

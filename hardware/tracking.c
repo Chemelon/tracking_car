@@ -1,5 +1,30 @@
 #include "tracking.h"
 
+#define TRACKER1_PERICMD RCC_APB2PeriphClockCmd
+#define TRACKER1_PERIPH RCC_APB2Periph_GPIOB
+#define TRACKER1_PORT GPIOB
+#define TRACKER1_PIN GPIO_Pin_4
+
+#define TRACKER2_PERICMD RCC_APB2PeriphClockCmd
+#define TRACKER2_PERIPH RCC_APB2Periph_GPIOB
+#define TRACKER2_PORT GPIOB
+#define TRACKER2_PIN GPIO_Pin_5
+
+#define TRACKER3_PERICMD RCC_APB2PeriphClockCmd
+#define TRACKER3_PERIPH RCC_APB2Periph_GPIOB
+#define TRACKER3_PORT GPIOB
+#define TRACKER3_PIN GPIO_Pin_6
+
+#define TRACKER4_PERICMD RCC_APB2PeriphClockCmd
+#define TRACKER4_PERIPH RCC_APB2Periph_GPIOB
+#define TRACKER4_PORT GPIOB
+#define TRACKER4_PIN GPIO_Pin_7
+
+#define TRACKER5_PERICMD RCC_APB2PeriphClockCmd
+#define TRACKER5_PERIPH RCC_APB2Periph_GPIOB
+#define TRACKER5_PORT GPIOB
+#define TRACKER5_PIN GPIO_Pin_8
+
 void GPIO_tracker_init(void)
 {
     GPIO_InitTypeDef gpio_init_struct;
@@ -12,8 +37,8 @@ void GPIO_tracker_init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
     gpio_init_struct.GPIO_Mode = GPIO_Mode_IPU;
-    gpio_init_struct.GPIO_Pin = TRACKER1_PIN;
     gpio_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
+    gpio_init_struct.GPIO_Pin = TRACKER1_PIN;
     /* 初始化上拉输入 */
     GPIO_Init(TRACKER1_PORT, &gpio_init_struct);
 
@@ -48,5 +73,4 @@ void GPIO_tracker_init(void)
     EXTI_Init(&exti_init_struct);
     exti_init_struct.EXTI_Line = EXTI_Line8;
     EXTI_Init(&exti_init_struct);
-
 }

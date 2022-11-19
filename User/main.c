@@ -11,7 +11,7 @@ int main(void)
     GPIO_PWM_init();
     TIM2_PWM_init();
     TIM1_PWM_init();
-    motor_gostright(500);
+    gostright(500);
     for (;;)
     {
         Usart_SendString(USART1, "helloworld\n");

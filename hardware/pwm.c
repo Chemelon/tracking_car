@@ -1,16 +1,43 @@
 #include "pwm.h"
 
+#define PWM_OUT1_PERICMD RCC_APB2PeriphClockCmd
+#define PWM_OUT1_PERIPH RCC_APB2Periph_GPIOA
+#define PWM_OUT1_PORT GPIOA
+#define PWM_OUT1_PIN GPIO_Pin_0
+
+#define PWM_OUT2_PERICMD RCC_APB2PeriphClockCmd
+#define PWM_OUT2_PERIPH RCC_APB2Periph_GPIOA
+#define PWM_OUT2_PORT GPIOA
+#define PWM_OUT2_PIN GPIO_Pin_1
+
+#define PWM_OUT3_PERICMD RCC_APB2PeriphClockCmd
+#define PWM_OUT3_PERIPH RCC_APB2Periph_GPIOA
+#define PWM_OUT3_PORT GPIOA
+#define PWM_OUT3_PIN GPIO_Pin_2
+
+#define PWM_OUT4_PERICMD RCC_APB2PeriphClockCmd
+#define PWM_OUT4_PERIPH RCC_APB2Periph_GPIOA
+#define PWM_OUT4_PORT GPIOA
+#define PWM_OUT4_PIN GPIO_Pin_3
+
+#define PWM_SERVO_PERICMD RCC_APB2PeriphClockCmd
+#define PWM_SERVO_PERIPH RCC_APB2Periph_GPIOA
+#define PWM_SERVO_PORT GPIOA
+#define PWM_SERVO_PIN GPIO_Pin_11
+
 /**
  * @brief 初始化GPIO为复用推挽输出 用于输出驱动电机和舵机的
- * 
+ *
  */
 void GPIO_PWM_init(void)
 {
     GPIO_InitTypeDef gpio_init_struct;
+
     /* 开启外设时钟 */
     PWM_OUT1_PERICMD(PWM_OUT1_PERIPH, ENABLE);
     PWM_OUT2_PERICMD(PWM_OUT2_PERIPH, ENABLE);
     PWM_SERVO_PERICMD(PWM_SERVO_PERIPH, ENABLE);
+
     /* 初始化TIM2的四个channel 复用推挽输出 */
     gpio_init_struct.GPIO_Mode = GPIO_Mode_AF_PP;
     gpio_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
@@ -31,8 +58,8 @@ void GPIO_PWM_init(void)
 }
 
 /**
- * @brief 初始化TIM2为PWM输出模式 开启所有输出通道 频率=1khz 
- * 
+ * @brief 初始化TIM2为PWM输出模式 开启所有输出通道 频率=1khz
+ *
  */
 void TIM2_PWM_init(void)
 {
@@ -40,7 +67,7 @@ void TIM2_PWM_init(void)
 
 #define SYS_CLOCK_FREQ 72000000       // APB2 定时器频率
 #define FCK_FREQ (SYS_CLOCK_FREQ / 1) // 定时器有PLL补偿所以和APB1频率一样
-#define CKCNT_FREQ 1000000             // 1000khz
+#define CKCNT_FREQ 1000000            // 1000khz
     /* 开启外设时钟 */
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
     /*100 KHz*/
@@ -63,7 +90,7 @@ void TIM2_PWM_init(void)
 
 /**
  * @brief 初始化TIM1为PWM输出模式 开启所输出通道4 频率=50hz
- * 
+ *
  */
 void TIM1_PWM_init(void)
 {
@@ -84,4 +111,3 @@ void TIM1_PWM_init(void)
     /* 开启TIM1时钟 */
     TIM1->CR1 |= TIM_CR1_CEN;
 }
-
