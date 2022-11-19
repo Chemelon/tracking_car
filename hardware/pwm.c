@@ -34,21 +34,21 @@ void TIM2_PWM_init(void)
 
 #define SYS_CLOCK_FREQ 72000000       // APB2 定时器频率
 #define FCK_FREQ (SYS_CLOCK_FREQ / 1) // 定时器有PLL补偿所以和APB1频率一样
-#define CKCNT_FREQ 100000             // 100khz
+#define CKCNT_FREQ 1000000             // 1000khz
     /* 开启外设时钟 */
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
     /*100 KHz*/
     TIM2->PSC = (FCK_FREQ / CKCNT_FREQ - 1);
-    /* 1 kHz (100)*/
+    /* 1 kHz (1000)*/
     TIM2->ARR = CKCNT_FREQ / TARGET_FREQ;
     /* 将四个通道分别配置成PWM输出模式 OCM = 0X110*/
     TIM2->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1;
     TIM2->CCMR2 |= TIM_CCMR2_OC3M_2 | TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC4M_2 | TIM_CCMR2_OC4M_1;
-    /* 占空比 50% */
-    TIM2->CCR1 = 50;
-    TIM2->CCR2 = 50;
-    TIM2->CCR3 = 50;
-    TIM2->CCR4 = 50;
+    /* 占空比 0% 初始化为停车状态*/
+    TIM2->CCR1 = 0;
+    TIM2->CCR2 = 0;
+    TIM2->CCR3 = 0;
+    TIM2->CCR4 = 0;
     /* 使能每个通道的比较功能 */
     TIM2->CCER |= TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E;
     /* 开启TIM2时钟 */
