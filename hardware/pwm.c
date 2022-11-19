@@ -20,6 +20,12 @@ void GPIO_PWM_init(void)
     gpio_init_struct.GPIO_Pin = PWM_OUT2_PIN;
     GPIO_Init(PWM_OUT2_PORT, &gpio_init_struct);
 
+    gpio_init_struct.GPIO_Pin = PWM_OUT3_PIN;
+    GPIO_Init(PWM_OUT3_PORT, &gpio_init_struct);
+
+    gpio_init_struct.GPIO_Pin = PWM_OUT4_PIN;
+    GPIO_Init(PWM_OUT4_PORT, &gpio_init_struct);
+
     gpio_init_struct.GPIO_Pin = PWM_SERVO_PIN;
     GPIO_Init(PWM_SERVO_PORT, &gpio_init_struct);
 }
