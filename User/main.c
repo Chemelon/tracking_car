@@ -21,11 +21,12 @@ int main(void)
     gostright(500);
 
     servo_turnleft(0);
-    Delay_ms(100);
+    /* SYSTick 不知到中断配没配置好 先不用了 */
+    //Delay_ms(100);
     servo_turnleft(45);
-    Delay_ms(100);
+    //Delay_ms(100);
     servo_turnleft(90);
-    Delay_ms(100);
+    //Delay_ms(100);
     servo_turnleft(135);
     for (;;)
     {
