@@ -67,7 +67,7 @@ void TIM2_PWM_init(void)
 
 #define SYS_CLOCK_FREQ 72000000       // APB2 定时器频率
 #define FCK_FREQ (SYS_CLOCK_FREQ / 1) // 定时器有PLL补偿所以和APB1频率一样
-#define CKCNT_FREQ 10000000           // 10 000 khz
+#define CKCNT_FREQ 10000000           // 10 000 000 khz
     /* 开启外设时钟 */
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
     /*100 KHz*/
@@ -94,16 +94,18 @@ void TIM2_PWM_init(void)
  */
 void TIM1_PWM_init(void)
 {
+    /*1000 KHz*/
+#define TIM1_CLKCNT_FREQ 1000000
     /* 开启外设时钟 */
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
-    /*10 KHz*/
-    TIM1->PSC = (FCK_FREQ / 10000 - 1);
-    /* 50Hz (200)*/
-    TIM1->ARR = 10000 / 50 - 1;
+    /*1000 KHz*/
+    TIM1->PSC = (FCK_FREQ / TIM1_CLKCNT_FREQ - 1);
+    /* 50Hz (20000)*/
+    TIM1->ARR = TIM1_CLKCNT_FREQ / 50 - 1;
     /* 通道4 PWM输出 */
     TIM1->CCMR2 |= TIM_CCMR2_OC4M_2 | TIM_CCMR2_OC4M_1;
-    /* 占空比 50% */
-    TIM1->CCR4 = 100;
+    /* 占空比 0% */
+    TIM1->CCR4 = 0;
     /* 使能比较功能 */
     TIM1->CCER |= TIM_CCER_CC4E;
     /* Main output enable */

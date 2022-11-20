@@ -5,8 +5,6 @@
 #include "usart.h"
 #include "motor.h"
 
-extern void servo_turnleft(uint16_t angle);
-
 int main(void)
 {
     /* 嵌套向量中断控制器组选择 */
@@ -18,16 +16,9 @@ int main(void)
     TIM1_PWM_init();
     GPIO_tracker_init();
     NVIC_tracker_init();
-    gostright(500);
 
-    servo_turnleft(0);
-    /* SYSTick 不知到中断配没配置好 先不用了 */
-    //Delay_ms(100);
-    servo_turnleft(45);
-    //Delay_ms(100);
-    servo_turnleft(90);
-    //Delay_ms(100);
-    servo_turnleft(135);
+
+    gostright(1500);
     for (;;)
     {
         Usart_SendString(USART1, "helloworld\n");

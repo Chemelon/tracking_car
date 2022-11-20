@@ -27,9 +27,9 @@ static void servo_straight(void)
  *
  * @param angle 转动角度 在函数内换算成PWM占空比
  */
-void servo_turnleft(uint16_t angle)
+static void servo_turnleft(uint16_t angle)
 {
-    MOTOR_SERVO_CCR = angle / K_SERVO_TURNLEFT + K_SERVO_BASELEFT;
+    MOTOR_SERVO_CCR = angle * 100 / K_SERVO_TURNLEFT + K_SERVO_BASELEFT;
 }
 
 /**
@@ -37,7 +37,7 @@ void servo_turnleft(uint16_t angle)
  *
  * @param angle 转动角度 在函数内换算成PWM占空比
  */
-void servo_turnright(uint16_t angle)
+static void servo_turnright(uint16_t angle)
 {
     MOTOR_SERVO_CCR = angle / K_SERVO_TURNRIGHT + K_SERVO_BASERIGHT;
 }
@@ -196,7 +196,7 @@ static void motor_diffal_turnright(uint16_t speed)
 void turnleft(uint16_t angle)
 {
     servo_turnleft(angle);
-#ifdef DIFFAL_SUP
+#if DIFFAL_SUP
     motor_diffal_turnleft(K_DIFFAL_SUP_SPEED);
 #endif
 }
@@ -209,7 +209,7 @@ void turnleft(uint16_t angle)
 void turnright(uint16_t angle)
 {
     servo_turnright(angle);
-#ifdef DIFFAL_SUP
+#if DIFFAL_SUP
     motor_diffal_turnright(K_DIFFAL_SUP_SPEED);
 #endif
 }
