@@ -23,7 +23,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-
+#include "SysTick.h" 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
   */
@@ -134,7 +134,7 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-#include "SysTick.h" 
+
   TimingDelay_Decrement();
 }
 

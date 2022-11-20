@@ -240,8 +240,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>D:\Repository\F103Fwlib-Template\Libraries\CMSIS\startup\startup_stm32f10x_ld.s</PathWithFileName>
-      <FilenameWithoutPath>startup_stm32f10x_ld.s</FilenameWithoutPath>
+      <PathWithFileName>..\Libraries\CMSIS\startup\startup_stm32f10x_md.s</PathWithFileName>
+      <FilenameWithoutPath>startup_stm32f10x_md.s</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

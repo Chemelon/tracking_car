@@ -7,6 +7,7 @@
 
 void SysTick_Init(void);
 void Delay_us(__IO u32 nTime);         // 单位1us
+void TimingDelay_Decrement(void);
 
 
 #define Delay_ms(x) Delay_us(x)	 //单位ms

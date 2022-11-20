@@ -25,6 +25,65 @@
 #define TRACKER5_PORT GPIOB
 #define TRACKER5_PIN GPIO_Pin_8
 
+/* 位带操作 */
+#define GPIOB_IDR_BIT4 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000)* 32 + 4 * 4))
+#define GPIOB_IDR_BIT5 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000)* 32 + 5 * 4))
+#define GPIOB_IDR_BIT6 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000)* 32 + 6 * 4))
+#define GPIOB_IDR_BIT7 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000)* 32 + 7 * 4))
+#define GPIOB_IDR_BIT8 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000)* 32 + 8 * 4))
+
+typedef struct tracker_status_struct{
+    volatile tracker_update_status_type update;
+    volatile uint32_t tarcker1_status;
+    volatile uint32_t tarcker2_status;
+    volatile uint32_t tarcker3_status;
+    volatile uint32_t tarcker4_status;
+    volatile uint32_t tarcker5_status;
+}tracker_type;
+
+volatile static tracker_type tracker_status;
+
+/**
+ * @brief 光电1中断服务函数
+ * 
+ */
+void EXTI4_IRQHandler(void)
+{
+    EXTI->PR = (EXTI->PR & EXTI_Line4)?EXTI_Line4:0;
+    /* 将光电管的状态保存至内存 */
+    tracker_status.update = tracker_updated;
+    tracker_status.tarcker1_status = GPIOB_IDR_BIT4;
+    tracker_status.tarcker2_status = GPIOB_IDR_BIT5;
+    tracker_status.tarcker3_status = GPIOB_IDR_BIT6;
+    tracker_status.tarcker4_status = GPIOB_IDR_BIT7;
+    tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
+}
+
+/**
+ * @brief 光电2-5中断服务函数
+ * 
+ */
+void EXTI9_5_IRQHandler(void)
+{
+    /* rc_w1 */
+    EXTI->PR = (EXTI->PR & EXTI_Line5)?EXTI_Line5:0;
+    EXTI->PR = (EXTI->PR & EXTI_Line6)?EXTI_Line6:0;
+    EXTI->PR = (EXTI->PR & EXTI_Line7)?EXTI_Line7:0;
+    EXTI->PR = (EXTI->PR & EXTI_Line8)?EXTI_Line8:0;
+    /* 将光电管的状态保存至内存 */
+    tracker_status.update = tracker_updated;
+    tracker_status.tarcker1_status = GPIOB_IDR_BIT4;
+    tracker_status.tarcker2_status = GPIOB_IDR_BIT5;
+    tracker_status.tarcker3_status = GPIOB_IDR_BIT6;
+    tracker_status.tarcker4_status = GPIOB_IDR_BIT7;
+    tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
+    
+}
+
+/**
+ * @brief 初始化光电的端口为外部中断
+ *
+ */
 void GPIO_tracker_init(void)
 {
     GPIO_InitTypeDef gpio_init_struct;
@@ -73,4 +132,40 @@ void GPIO_tracker_init(void)
     EXTI_Init(&exti_init_struct);
     exti_init_struct.EXTI_Line = EXTI_Line8;
     EXTI_Init(&exti_init_struct);
+}
+
+/**
+ * @brief 配置外部中断优先级
+ *
+ */
+void NVIC_tracker_init(void)
+{
+    NVIC_InitTypeDef NVIC_InitStructure;
+
+    /* 配置USART为中断源 */
+    NVIC_InitStructure.NVIC_IRQChannel = EXTI4_IRQn;
+    /* 抢断优先级*/
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;
+    /* 子优先级 */
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    /* 使能中断 */
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    /* 初始化配置NVIC */
+    NVIC_Init(&NVIC_InitStructure);
+
+    /* 配置USART为中断源 */
+    NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
+    /* 抢断优先级*/
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
+    /* 初始化配置NVIC */
+    NVIC_Init(&NVIC_InitStructure);
+}
+
+/**
+ * @brief 实现循迹功能
+ * 
+ */
+void tracking(void)
+{
+
 }

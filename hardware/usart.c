@@ -26,9 +26,6 @@ static void NVIC_Configuration(void)
 {
     NVIC_InitTypeDef NVIC_InitStructure;
 
-    /* 嵌套向量中断控制器组选择 */
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
-
     /* 配置USART为中断源 */
     NVIC_InitStructure.NVIC_IRQChannel = DEBUG_USART_IRQ;
     /* 抢断优先级*/
@@ -96,7 +93,7 @@ void USART_Config(void)
 }
 
 /*****************  发送一个字节 **********************/
-void Usart_SendByte(USART_TypeDef *pUSARTx, uint8_t ch)
+inline void Usart_SendByte(USART_TypeDef *pUSARTx, uint8_t ch)
 {
     /* 发送一个字节数据到USART */
     USART_SendData(pUSARTx, ch);
@@ -131,9 +128,6 @@ void Usart_SendString(USART_TypeDef *pUSARTx, char *str)
     }
     while (*(str + k) != '\0');
 
-    /* 等待发送完成 */
-    while (USART_GetFlagStatus(pUSARTx, USART_FLAG_TC) == RESET)
-    {}
 }
 
 /*****************  发送一个16位数 **********************/
