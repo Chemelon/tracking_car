@@ -70,7 +70,7 @@ void TIM2_PWM_init(void)
 #define CKCNT_FREQ 10000000           // 10 000 000 khz
     /* 开启外设时钟 */
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-    /*100 KHz*/
+    /*10000 KHz*/
     TIM2->PSC = (FCK_FREQ / CKCNT_FREQ - 1);
     /* 1 kHz (10000)*/
     TIM2->ARR = CKCNT_FREQ / TARGET_FREQ - 1;

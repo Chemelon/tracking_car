@@ -29,9 +29,9 @@ static void NVIC_Configuration(void)
     /* 配置USART为中断源 */
     NVIC_InitStructure.NVIC_IRQChannel = DEBUG_USART_IRQ;
     /* 抢断优先级*/
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;
     /* 子优先级 */
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     /* 使能中断 */
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     /* 初始化配置NVIC */
@@ -83,10 +83,10 @@ void USART_Config(void)
     USART_Init(DEBUG_USARTx, &USART_InitStructure);
 
     // 串口中断优先级配置
-    NVIC_Configuration();
+    //NVIC_Configuration();
 
     // 使能串口接收中断
-    USART_ITConfig(DEBUG_USARTx, USART_IT_RXNE, ENABLE);
+    //USART_ITConfig(DEBUG_USARTx, USART_IT_RXNE, ENABLE);
 
     // 使能串口
     USART_Cmd(DEBUG_USARTx, ENABLE);

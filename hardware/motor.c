@@ -29,7 +29,7 @@ static void servo_straight(void)
  */
 static void servo_turnleft(uint16_t angle)
 {
-    MOTOR_SERVO_CCR = angle * 100 / K_SERVO_TURNLEFT + K_SERVO_BASELEFT;
+    MOTOR_SERVO_CCR = -(angle * 100 / K_SERVO_TURNLEFT) + K_SERVO_STRBASE;
 }
 
 /**
@@ -39,7 +39,7 @@ static void servo_turnleft(uint16_t angle)
  */
 static void servo_turnright(uint16_t angle)
 {
-    MOTOR_SERVO_CCR = angle / K_SERVO_TURNRIGHT + K_SERVO_BASERIGHT;
+    MOTOR_SERVO_CCR = (angle * 100 / K_SERVO_TURNRIGHT) + K_SERVO_STRBASE;
 }
 
 #endif
@@ -172,8 +172,8 @@ void goback(uint16_t speed)
 static void motor_diffal_turnleft(uint16_t speed)
 {
     /* 差速转向 */
-    motor_setforward_left(MOTOR_PWMBASE_LEFT + speed * K_MOTOR_TURNLEFT);
-    motor_setforward_right(MOTOR_PWMBASH_RIGHT + speed);
+    motor_setforward_left(MOTOR_PWMBASE_LEFT + speed);
+    motor_setforward_right(MOTOR_PWMBASH_RIGHT + speed + K_MOTOR_TURNLEFT);
 }
 
 /**
@@ -184,8 +184,8 @@ static void motor_diffal_turnleft(uint16_t speed)
 static void motor_diffal_turnright(uint16_t speed)
 {
     /* 差速转向 */
-    motor_setforward_left(MOTOR_PWMBASE_LEFT + speed);
-    motor_setforward_right(MOTOR_PWMBASH_RIGHT + speed * K_MOTOR_TURNRIGHT);
+    motor_setforward_left(MOTOR_PWMBASE_LEFT + speed + K_MOTOR_TURNRIGHT);
+    motor_setforward_right(MOTOR_PWMBASH_RIGHT + speed);
 }
 
 /**
