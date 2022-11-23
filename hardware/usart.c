@@ -22,6 +22,7 @@
  * @param  无
  * @retval 无
  */
+#if 0
 static void NVIC_Configuration(void)
 {
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -37,7 +38,7 @@ static void NVIC_Configuration(void)
     /* 初始化配置NVIC */
     NVIC_Init(&NVIC_InitStructure);
 }
-
+#endif
 /**
  * @brief  USART GPIO 配置,工作参数配置
  * @param  无
@@ -170,3 +171,7 @@ int fgetc(FILE *f)
     return (int)USART_ReceiveData(DEBUG_USARTx);
 }
 
+void USART1_DMA_config(void)
+{
+    
+}

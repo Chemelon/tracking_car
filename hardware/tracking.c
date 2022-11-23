@@ -33,12 +33,12 @@
 #define GPIOB_IDR_BIT7 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 7 * 4))
 #define GPIOB_IDR_BIT8 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 8 * 4))
 
-volatile static tracker_type tracker_status = {tracker_resloved,0,0,0,0,0,0,0};
+volatile static tracker_type tracker_status = {tracker_resloved, 0, 0, 0, 0, 0, 0, 0};
 volatile tracker_type *ptracker_status = &tracker_status;
 
 /**
  * @brief 中断方式相关函数
- * 
+ *
  */
 #if !TRACKER_POLLING
 /**
@@ -55,7 +55,7 @@ void EXTI4_IRQHandler(void)
     tracker_status.tarcker3_status = GPIOB_IDR_BIT6;
     tracker_status.tarcker4_status = GPIOB_IDR_BIT7;
     tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
-    Usart_SendString(USART1, "ext4\r\n");
+    // Usart_SendString(USART1, "ext4\r\n");
 }
 
 /**
@@ -76,7 +76,7 @@ void EXTI9_5_IRQHandler(void)
     tracker_status.tarcker3_status = GPIOB_IDR_BIT6;
     tracker_status.tarcker4_status = GPIOB_IDR_BIT7;
     tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
-    Usart_SendString(USART1, "ext5-9\r\n");
+    // Usart_SendString(USART1, "ext5-9\r\n");
 }
 
 /**
@@ -162,25 +162,32 @@ void NVIC_tracker_init(void)
 }
 #endif
 
-
 /**
  * @brief 轮询方式相关函数
- * 
+ *
  */
 #if TRACKER_POLLING
 /**
- * @brief 中断频率为10khz 累计100次的采样总值 即实际控制处理频率约为100hz
- * 
+ * @brief 中断频率为500hz 累计10次的采样总值 即实际控制处理频率约为50hz
+ *
  */
 void TIM3_IRQHandler(void)
 {
     TIM3->SR = ~TIM_SR_UIF;
     tracker_status.tracker_cnt_it++;
-    
-    if (tracker_status.tracker_cnt_it < 101)
+
+    if (tracker_status.tracker_cnt_it < 11)
+    // if (1)
     {
         /* 将光电管的状态保存至内存 */
-        tracker_status.tracker_sum_signed += GPIOB_IDR_BIT5 + GPIOB_IDR_BIT6 - GPIOB_IDR_BIT7;
+        tracker_status.update = tracker_updated;
+        tracker_status.tarcker1_status = GPIOB_IDR_BIT4;
+        tracker_status.tarcker2_status = GPIOB_IDR_BIT5; // 1
+        tracker_status.tarcker3_status = GPIOB_IDR_BIT6; // 1
+        tracker_status.tarcker4_status = GPIOB_IDR_BIT7; // 1
+        tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
+        /* 将光电管的状态保存至内存 */
+        tracker_status.tracker_sum_signed += GPIOB_IDR_BIT5 - GPIOB_IDR_BIT7;
     }
     else
     {
@@ -227,11 +234,11 @@ void GPIO_tracker_init_polling(void)
  */
 void TIM3_tracker_init_polling(void)
 {
-#define TARGET_FREQ 10000 // 目标频率
+#define TARGET_FREQ 500 // 目标频率
 
 #define SYS_CLOCK_FREQ 72000000       // APB1 定时器频率
 #define FCK_FREQ (SYS_CLOCK_FREQ / 1) // 定时器有PLL补偿所以和APB1频率一样
-#define CKCNT_FREQ 10000000           // 10 000 000 khz
+#define CKCNT_FREQ 100000             // 100 000 hz
     /* 开启外设时钟 */
     RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
     /*10000 KHz*/
@@ -263,37 +270,56 @@ void NVIC_tracker_init_polling(void)
 }
 #endif
 
+void tracker_resume(void)
+{
+    /* 清除累计值 */
+    ptracker_status->tracker_sum_signed = 0;
+    /* 复位计数值 */
+    ptracker_status->tracker_cnt_it = 0;
+    /* 更新状态 */
+    ptracker_status->update = tracker_resloved;
+    /* 复位CNT */
+    TIM3->CNT = 0;
+    /* 使能定时器 */
+    TIM3->CR1 |= TIM_CR1_CEN;
+}
+
+int32_t esp8266_sendinfo(void)
+{
+    int32_t temp = ptracker_status->tracker_sum_signed;
+    if (ptracker_status->update == tracker_updated)
+    {
+        Usart_SendString(USART1, ((ptracker_status->tarcker1_status) ? "1 " : "0 "));
+        Usart_SendString(USART1, ((ptracker_status->tarcker2_status) ? "1 " : "0 "));
+        Usart_SendString(USART1, ((ptracker_status->tarcker3_status) ? "1 " : "0 "));
+        Usart_SendString(USART1, ((ptracker_status->tarcker4_status) ? "1 " : "0 "));
+        Usart_SendString(USART1, ((ptracker_status->tarcker5_status) ? "1 " : "0 "));
+        /* 取得累计值 */
+        printf("total: %d \r\n", ptracker_status->tracker_sum_signed);
+    }
+    return temp;
+}
+
+int32_t caclu_pid(void)
+{
+    static int err_priv1 = 0, err_priv2 = 0;
+    int err_curr;
+    int pid_delta;
+    /* tracker_sum_signed 是一个-10~10 的数 */
+    err_curr = tracker_status.tracker_sum_signed;
+
+    pid_delta = (KP * (err_curr - err_priv1)) + (KI * (err_curr)) + (KD * (err_curr - 2 * err_priv1 + err_priv2));
+
+    err_priv2 = err_priv1;
+    err_priv1 = err_curr;
+
+    return pid_delta;
+}
 
 /**
- * @brief 实现循迹功能
+ * @brief 实现循迹
  *
  */
 void tracking(void)
 {
-    if (ptracker_status->update == tracker_updated)
-    {
-#if 0 
-previous02_error := 0  //上上次偏差
-previous01_error := 0  //上一次偏差
-integral := 0   //积分和
-pid_out := 0   //pid增量累加和
-//循环 
-//采样周期为dt
-loop:
- //setpoint 设定值
- //measured_value 反馈值
-    error := setpoint − measured_value //计算得到偏差
-    proportion := error - previous01_error //计算得到比例输出
-    integral := error × dt //计算得到积分累加和
-    derivative := (error − 2*previous01_error + previous02_error) / dt //计算得到微分
-    pid_delta := Kp × error + Ki × integral + Kd × derivative //计算得到PID增量
-    pid_out := pid_out + pid_delta //计算得到PID输出
- 
-    //保存当前的偏差和上一次偏差作为下一次采样所需要的历史偏差
-    previous02_error := previous01_error 
-    previous01_error := error    //保存当前偏差为下一次采样时所需要的历史偏差
-    wait(dt) //等待下一次采用
-    goto loop
-#endif
-    }
 }

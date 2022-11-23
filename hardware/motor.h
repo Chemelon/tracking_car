@@ -20,7 +20,7 @@
 #define K_SERVO_BASERIGHT K_SERVO_STRBASE
 
 /* 决定是否使用减速电机差速辅助转弯 1 开启 0 关闭 */
-#define DIFFAL_SUP 1
+#define DIFFAL_SUP 0
 /* 此值越大 转弯幅度越大 */
 #define K_MOTOR_TURNLEFT 1000
 #define K_MOTOR_TURNRIGHT 1000
