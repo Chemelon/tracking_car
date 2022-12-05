@@ -8,8 +8,11 @@
  */
 #define TRACKER_POLLING 1
 
+/* 比例 */
 #define KP 1
+/* 积分 */
 #define KI 2
+/* 微分 */
 #define KD 3
 
 /**
@@ -48,7 +51,7 @@ void NVIC_tracker_init(void);
 void GPIO_tracker_init_polling(void);
 void TIM3_tracker_init_polling(void);
 void NVIC_tracker_init_polling(void);
-int32_t esp8266_sendinfo(void);
+void USART_sendinfo(void);
 int32_t caclu_pid(void);
 
 #endif

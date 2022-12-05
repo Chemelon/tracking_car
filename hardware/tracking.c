@@ -245,7 +245,7 @@ void TIM3_tracker_init_polling(void)
     TIM3->PSC = (FCK_FREQ / CKCNT_FREQ - 1);
     /* 清空计数器 */
     TIM3->CNT = 0;
-    /* 10 kHz (1000)*/
+    /* 500 Hz (200)*/
     TIM3->ARR = CKCNT_FREQ / TARGET_FREQ - 1;
     /* 开启更新中断 */
     TIM3->DIER |= TIM_DIER_UIE;
@@ -284,9 +284,8 @@ void tracker_resume(void)
     TIM3->CR1 |= TIM_CR1_CEN;
 }
 
-int32_t esp8266_sendinfo(void)
+void USART_sendinfo(void)
 {
-    int32_t temp = ptracker_status->tracker_sum_signed;
     if (ptracker_status->update == tracker_updated)
     {
         Usart_SendString(USART1, ((ptracker_status->tarcker1_status) ? "1 " : "0 "));
@@ -297,11 +296,11 @@ int32_t esp8266_sendinfo(void)
         /* 取得累计值 */
         printf("total: %d \r\n", ptracker_status->tracker_sum_signed);
     }
-    return temp;
 }
 
 int32_t caclu_pid(void)
 {
+    /* 上个误差值以及上上个误差值 */
     static int err_priv1 = 0, err_priv2 = 0;
     int err_curr;
     int pid_delta;

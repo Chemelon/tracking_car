@@ -9,15 +9,10 @@
 /* 舵机直线方向时的占空比 */
 /* 0度 高电平0.5ms = 500 us CCR 每加一高电平时间增加1us */
 #define K_SERVO_STRBASE 1290
-//#define K_SERVO_STRBASE (500/1)
 
 /* 舵机转向参数 用于将角度换算成PWM占空比来控制舵机 */
 #define K_SERVO_TURNLEFT (9)
 #define K_SERVO_TURNRIGHT (9)
-
-/* 用于将角度换算成PWM占空比来控制舵机 */
-#define K_SERVO_BASELEFT K_SERVO_STRBASE
-#define K_SERVO_BASERIGHT K_SERVO_STRBASE
 
 /* 决定是否使用减速电机差速辅助转弯 1 开启 0 关闭 */
 #define DIFFAL_SUP 0

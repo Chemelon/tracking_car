@@ -26,7 +26,7 @@
 #define PWM_SERVO_PIN GPIO_Pin_11
 
 /**
- * @brief 初始化GPIO为复用推挽输出 用于输出驱动电机和舵机的
+ * @brief 初始化GPIO为复用推挽输出
  *
  */
 void GPIO_PWM_init(void)
