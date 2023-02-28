@@ -3,8 +3,8 @@
 #include "stm32f10x.h"
 
 /* 电机PWM输出基准值,此状态为小车以一个合适的速度前进 */
-#define MOTOR_PWMBASE_LEFT  1900
-#define MOTOR_PWMBASH_RIGHT 2000
+#define MOTOR_PWMBASE_LEFT  3400
+#define MOTOR_PWMBASH_RIGHT 3500
 
 /* 舵机直线方向时的占空比 */
 /* 0度 高电平0.5ms = 500 us CCR 每加一高电平时间增加1us */
@@ -24,10 +24,13 @@
 #define k_DIFFAL_SUP_SPEED 1500
 
 
-void gostright(uint16_t speed);
+void gostraight(uint16_t speed);
 void goback(uint16_t speed);
+void servo_turnleft(uint16_t angle);
+void servo_turnright(uint16_t angle);
 void turnleft(uint16_t angle);
 void turnright(uint16_t angle);
+void stop(void);
 
 #endif
 

@@ -50,10 +50,10 @@ void EXTI4_IRQHandler(void)
     EXTI->PR = (EXTI->PR & EXTI_Line4) ? EXTI_Line4 : 0;
     /* 将光电管的状态保存至内存 */
     tracker_status.update = tracker_updated;
-    tracker_status.tarcker1_status = GPIOB_IDR_BIT4;
-    tracker_status.tarcker2_status = GPIOB_IDR_BIT5;
+    tracker_status.tarcker1_status = GPIOB_IDR_BIT5;
+    tracker_status.tarcker2_status = GPIOB_IDR_BIT7;
     tracker_status.tarcker3_status = GPIOB_IDR_BIT6;
-    tracker_status.tarcker4_status = GPIOB_IDR_BIT7;
+    tracker_status.tarcker4_status = GPIOB_IDR_BIT4;
     tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
     // Usart_SendString(USART1, "ext4\r\n");
 }
@@ -71,10 +71,10 @@ void EXTI9_5_IRQHandler(void)
     EXTI->PR = (EXTI->PR & EXTI_Line8) ? EXTI_Line8 : 0;
     /* 将光电管的状态保存至内存 */
     tracker_status.update = tracker_updated;
-    tracker_status.tarcker1_status = GPIOB_IDR_BIT4;
-    tracker_status.tarcker2_status = GPIOB_IDR_BIT5;
+    tracker_status.tarcker1_status = GPIOB_IDR_BIT5;
+    tracker_status.tarcker2_status = GPIOB_IDR_BIT7;
     tracker_status.tarcker3_status = GPIOB_IDR_BIT6;
-    tracker_status.tarcker4_status = GPIOB_IDR_BIT7;
+    tracker_status.tarcker4_status = GPIOB_IDR_BIT4;
     tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
     // Usart_SendString(USART1, "ext5-9\r\n");
 }
@@ -176,18 +176,17 @@ void TIM3_IRQHandler(void)
     TIM3->SR = ~TIM_SR_UIF;
     tracker_status.tracker_cnt_it++;
 
-    if (tracker_status.tracker_cnt_it < 11)
-    // if (1)
+    if (tracker_status.tracker_cnt_it < 110)
     {
         /* 将光电管的状态保存至内存 */
-        tracker_status.update = tracker_updated;
-        tracker_status.tarcker1_status = GPIOB_IDR_BIT4;
-        tracker_status.tarcker2_status = GPIOB_IDR_BIT5; // 1
+        //tracker_status.update = tracker_updated;
+        tracker_status.tarcker1_status = GPIOB_IDR_BIT5;
+        tracker_status.tarcker2_status = GPIOB_IDR_BIT7; // 1
         tracker_status.tarcker3_status = GPIOB_IDR_BIT6; // 1
-        tracker_status.tarcker4_status = GPIOB_IDR_BIT7; // 1
+        tracker_status.tarcker4_status = GPIOB_IDR_BIT4; // 1
         tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
         /* 将光电管的状态保存至内存 */
-        tracker_status.tracker_sum_signed += GPIOB_IDR_BIT5 - GPIOB_IDR_BIT7;
+        tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
     }
     else
     {
@@ -257,7 +256,7 @@ void NVIC_tracker_init_polling(void)
 {
     NVIC_InitTypeDef NVIC_InitStructure;
 
-    /* 配置USART为中断源 */
+    /* 配置TIM3为中断源 */
     NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
     /* 抢断优先级*/
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;
@@ -288,6 +287,7 @@ void USART_sendinfo(void)
 {
     if (ptracker_status->update == tracker_updated)
     {
+
         Usart_SendString(USART1, ((ptracker_status->tarcker1_status) ? "1 " : "0 "));
         Usart_SendString(USART1, ((ptracker_status->tarcker2_status) ? "1 " : "0 "));
         Usart_SendString(USART1, ((ptracker_status->tarcker3_status) ? "1 " : "0 "));
@@ -295,6 +295,8 @@ void USART_sendinfo(void)
         Usart_SendString(USART1, ((ptracker_status->tarcker5_status) ? "1 " : "0 "));
         /* 取得累计值 */
         printf("total: %d \r\n", ptracker_status->tracker_sum_signed);
+        /* 更新状态 */
+        tracker_resume();
     }
 }
 

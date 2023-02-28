@@ -27,7 +27,7 @@ static void servo_straight(void)
  *
  * @param angle 转动角度 在函数内换算成PWM占空比
  */
-static void servo_turnleft(uint16_t angle)
+void servo_turnleft(uint16_t angle)
 {
     MOTOR_SERVO_CCR = -(angle * 100 / K_SERVO_TURNLEFT) + K_SERVO_STRBASE;
 }
@@ -37,7 +37,7 @@ static void servo_turnleft(uint16_t angle)
  *
  * @param angle 转动角度 在函数内换算成PWM占空比
  */
-static void servo_turnright(uint16_t angle)
+void servo_turnright(uint16_t angle)
 {
     MOTOR_SERVO_CCR = (angle * 100 / K_SERVO_TURNRIGHT) + K_SERVO_STRBASE;
 }
@@ -139,11 +139,11 @@ static void motor_setbackward_right(uint16_t pwm_ccr_val)
 }
 
 /**
- * @brief 前进
+ * @brief 后退
  *
- * @param pwm_val 前进速度
+ * @param pwm_val 速度
  */
-void gostright(uint16_t speed)
+void goback(uint16_t speed)
 {
     /* 舵机转向直线方向 */
     servo_straight();
@@ -152,11 +152,11 @@ void gostright(uint16_t speed)
 }
 
 /**
- * @brief 后退
+ * @brief 前进
  *
  * @param speed
  */
-void goback(uint16_t speed)
+void gostraight(uint16_t speed)
 {
     /* 舵机转向直线方向 */
     servo_straight();
@@ -212,5 +212,11 @@ void turnright(uint16_t angle)
 #if DIFFAL_SUP
     motor_diffal_turnright(K_DIFFAL_SUP_SPEED);
 #endif
+}
+
+void stop(void)
+{
+    motor_setstop_right();
+    motor_setstop_left();
 }
 #endif

@@ -3,7 +3,7 @@
 #include "stm32f10x.h"
 
 /**
- * @brief 选择获取光电数据的方式 1 轮询 2 外部中断
+ * @brief 选择获取光电数据的方式 1 轮询 0 外部中断
  * 
  */
 #define TRACKER_POLLING 1

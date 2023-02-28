@@ -9,7 +9,7 @@ int main(void)
 {
     /* 嵌套向量中断控制器组选择 */
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
-    // SysTick_Init();
+    SysTick_Init();
     USART_Config();
     GPIO_PWM_init();
     TIM2_PWM_init();
@@ -23,7 +23,14 @@ int main(void)
     NVIC_tracker_init();
 #endif
     Usart_SendString(USART1, "system inited\r\n");
+    //gostraight(0);
+    turnleft(90);
+    Delay_ms(1000);
+    turnright(0);
+    //stop();
     for (;;)
     {
+        USART_sendinfo();
+        //Delay_ms(500);
     }
 }
