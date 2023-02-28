@@ -23,14 +23,6 @@ int main(void)
     NVIC_tracker_init();
 #endif
     Usart_SendString(USART1, "system inited\r\n");
-    //gostraight(0);
-    turnleft(90);
-    Delay_ms(1000);
-    turnright(0);
-    //stop();
-    for (;;)
-    {
-        USART_sendinfo();
-        //Delay_ms(500);
-    }
+    stateswitcher();
+    return 0;
 }

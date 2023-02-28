@@ -1,5 +1,7 @@
 #include "tracking.h"
 #include "usart.h"
+#include "FunctionList.h"
+#include "motor.h"
 
 #define TRACKER1_PERICMD RCC_APB2PeriphClockCmd
 #define TRACKER1_PERIPH RCC_APB2Periph_GPIOB
@@ -174,12 +176,17 @@ void NVIC_tracker_init(void)
 void TIM3_IRQHandler(void)
 {
     TIM3->SR = ~TIM_SR_UIF;
-    tracker_status.tracker_cnt_it++;
-
-    if (tracker_status.tracker_cnt_it < 110)
+    if (tracker_status.tracker_cnt_it > 110)
+    {
+        /* 关闭计数器 */
+        TIM3->CR1 &= ~TIM_CR1_CEN;
+        /* 通知更新 */
+        tracker_status.update = tracker_updated;
+        return;
+    }
     {
         /* 将光电管的状态保存至内存 */
-        //tracker_status.update = tracker_updated;
+        // tracker_status.update = tracker_updated;
         tracker_status.tarcker1_status = GPIOB_IDR_BIT5;
         tracker_status.tarcker2_status = GPIOB_IDR_BIT7; // 1
         tracker_status.tarcker3_status = GPIOB_IDR_BIT6; // 1
@@ -187,13 +194,7 @@ void TIM3_IRQHandler(void)
         tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
         /* 将光电管的状态保存至内存 */
         tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
-    }
-    else
-    {
-        /* 关闭计数器 */
-        TIM3->CR1 &= ~TIM_CR1_CEN;
-        /* 通知更新 */
-        tracker_status.update = tracker_updated;
+        tracker_status.tracker_cnt_it++;
     }
 }
 
@@ -233,7 +234,7 @@ void GPIO_tracker_init_polling(void)
  */
 void TIM3_tracker_init_polling(void)
 {
-#define TARGET_FREQ 500 // 目标频率
+#define TARGET_FREQ POLLING_FREQ // 目标频率
 
 #define SYS_CLOCK_FREQ 72000000       // APB1 定时器频率
 #define FCK_FREQ (SYS_CLOCK_FREQ / 1) // 定时器有PLL补偿所以和APB1频率一样
@@ -269,8 +270,9 @@ void NVIC_tracker_init_polling(void)
 }
 #endif
 
-void tracker_resume(void)
+void tracking_resume(void)
 {
+#if TRACKER_POLLING
     /* 清除累计值 */
     ptracker_status->tracker_sum_signed = 0;
     /* 复位计数值 */
@@ -281,13 +283,19 @@ void tracker_resume(void)
     TIM3->CNT = 0;
     /* 使能定时器 */
     TIM3->CR1 |= TIM_CR1_CEN;
+#else
+    ptracker_status->update = tracker_resloved;
+#endif
 }
 
+/**
+ * @brief 通过串口发送光电管状态 DEBUG 用
+ *
+ */
 void USART_sendinfo(void)
 {
     if (ptracker_status->update == tracker_updated)
     {
-
         Usart_SendString(USART1, ((ptracker_status->tarcker1_status) ? "1 " : "0 "));
         Usart_SendString(USART1, ((ptracker_status->tarcker2_status) ? "1 " : "0 "));
         Usart_SendString(USART1, ((ptracker_status->tarcker3_status) ? "1 " : "0 "));
@@ -296,31 +304,70 @@ void USART_sendinfo(void)
         /* 取得累计值 */
         printf("total: %d \r\n", ptracker_status->tracker_sum_signed);
         /* 更新状态 */
-        tracker_resume();
+        tracking_resume();
     }
-}
 
-int32_t caclu_pid(void)
-{
-    /* 上个误差值以及上上个误差值 */
-    static int err_priv1 = 0, err_priv2 = 0;
-    int err_curr;
-    int pid_delta;
-    /* tracker_sum_signed 是一个-10~10 的数 */
-    err_curr = tracker_status.tracker_sum_signed;
+    int32_t caclu_pid(void)
+    {
+        /* 上个误差值以及上上个误差值 */
+        static int err_priv1 = 0, err_priv2 = 0;
+        int err_curr;
+        int pid_delta;
+        /* tracker_sum_signed 是一个-10~10 的数 */
+        err_curr = tracker_status.tracker_sum_signed;
 
-    pid_delta = (KP * (err_curr - err_priv1)) + (KI * (err_curr)) + (KD * (err_curr - 2 * err_priv1 + err_priv2));
+        pid_delta = (KP * (err_curr - err_priv1)) + (KI * (err_curr)) + (KD * (err_curr - 2 * err_priv1 + err_priv2));
 
-    err_priv2 = err_priv1;
-    err_priv1 = err_curr;
+        err_priv2 = err_priv1;
+        err_priv1 = err_curr;
 
-    return pid_delta;
-}
+        return pid_delta;
+    }
 
-/**
- * @brief 实现循迹
- *
- */
-void tracking(void)
-{
-}
+    /**
+     * @brief 状态切换器 按照顺序切换状态
+     *
+     */
+    void stateswitcher(void)
+    {
+        static uint8_t state_list[STATE_NUM] =
+            {
+                0x00,
+            };
+        for (int i = 0; i < STATE_NUM; i++)
+        {
+            FunList_Call(state_list[i]);
+        }
+    }
+
+    /**
+     * @brief 直线循迹
+     *
+     */
+    void tracking_straight(void)
+    {
+        for (;;)
+        {
+            if (ptracker_status->update == tracker_resloved)
+            {
+                continue;
+            }
+            if (ptracker_status->tarcker2_status == 1)
+            {
+                /* 偏左 向右修正*/
+                servo_setangle(S_RIGHTWARD);
+                motor_setforward_left(PWMBASE_LEFT + RIGHTWARD_ADD);
+                motor_setforward_right(PWMBASH_RIGHT);
+                DEBUG_STRAIGHT_LOG("RIGHTWARD\r\n");
+            }
+            else if (ptracker_status->tarcker4_status == 1)
+            {
+                /* 偏右 向左修正*/
+                servo_setangle(S_LEFTWARD);
+                motor_setforward_left(PWMBASE_LEFT);
+                motor_setforward_right(PWMBASH_RIGHT + LEFTWARD_ADD);
+                DEBUG_STRAIGHT_LOG("LEFTWARD\r\n");
+            }
+            tracking_resume();
+        }
+    }

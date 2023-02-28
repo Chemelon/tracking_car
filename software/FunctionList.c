@@ -1,8 +1,5 @@
 #include "stm32f10x.h"
 #include "FunctionList.h"
-uint8_t mode8, size8, num8;
-u16 sx16, sy16, ex16, ey16, color16, addr16, num16;
-u32 addr32, num32;
 
 typedef struct
 {
@@ -13,31 +10,31 @@ typedef struct
 
 _FunList_TypeDef FunList_0xh[] =
     {
-        (void *)Fun_HandShake_00h,
+        (void *)FUNC_0X00,
         0x00,
-        (void *)NULL,
+        (void *)FUNC_0X01,
         0,
-        (void *)NULL,
+        (void *)FUNC_0X02,
         0,
-        (void *)NULL,
+        (void *)FUNC_0X03,
         0,
-        (void *)NULL,
+        (void *)FUNC_0X04,
         0,
-        (void *)NULL,
+        (void *)FUNC_0X05,
         0,
-        (void *)NULL,
+        (void *)FUNC_0X06,
         0,
-        (void *)NULL,
+        (void *)FUNC_0X07,
         0,
-        (void *)NULL,
+        (void *)FUNC_0X08,
         0,
-        (void *)NULL,
+        (void *)FUNC_0X09,
         0,
 };
 
 _FunList_TypeDef FunList_1xh[] =
     {
-        (void *)Fun_DisplayConfig_10h,
+        (void *)NULL,
         0x10,
         (void *)NULL,
         0,
@@ -62,7 +59,7 @@ _FunList_TypeDef FunList_1xh[] =
 
 _FunList_TypeDef FunList_2xh[] =
     {
-        (void *)Fun_ShowFont_20h,
+        (void *)NULL,
         0x20,
         (void *)NULL,
         0,
@@ -172,9 +169,9 @@ _FunList_TypeDef FunList_6xh[] =
         0,
         (void *)NULL,
         0,
-        (void *)Fun_LCDClear_65h,
+        (void *)NULL,
         0x65,
-        (void *)Fun_FillRectangle_66h,
+        (void *)NULL,
         0x66,
         (void *)NULL,
         0,
@@ -238,21 +235,21 @@ _FunList_TypeDef FunList_9xh[] =
     {
         (void *)NULL,
         0,
-        (void *)Fun_DisplayPic_91h,
+        (void *)NULL,
         0x91,
-        (void *)Fun_SetDisplayDir_92h,
+        (void *)NULL,
         0x92,
         (void *)NULL,
         0,
-        (void *)Fun_WR_EE_94h,
+        (void *)NULL,
         0x94,
-        (void *)Fun_RD_EE_95h,
+        (void *)NULL,
         0x95,
-        (void *)Fun_WR_FLASH_96h,
+        (void *)NULL,
         0x96,
-        (void *)Fun_RD_FLASH_97h,
+        (void *)NULL,
         0x97,
-        (void *)Fun_FileDownLoad_98h,
+        (void *)NULL,
         0x98,
         (void *)NULL,
         0,
@@ -273,19 +270,9 @@ _FunList_TypeDef *FunMenu[] =
         FunList_9xh,
 };
 
-/*回调函数*/
-void Fun_Ack_CallBack(uint8_t FunCode)
+void FunList_Call(uint8_t code)
 {
-    UART1_SendByte(0xAA); //返回 AA FunCode 00
-    UART1_SendByte(FunCode);
-    UART1_SendByte(0x00);
+#define FUNC_PRT_TYPE void (*)(void)
+#define FUNC_PRT FunMenu[(code&0xf0)>>4][code&0x0f].Func
+    ((FUNC_PRT_TYPE)(FUNC_PRT))();
 }
-/********************接口函数**********************/
-void Fun_HandShake_00h(uint8_t FunCode)
-{
-    Fun_Ack_CallBack(FunCode);
-}
-#if 0
-/*调用对应函数*/
-(*(u32 (*)())((FunMenu[temp >> 4][temp & 0x0F]).Func))((FunMenu[temp >> 4][temp & 0x0F]).Code);
-#endif

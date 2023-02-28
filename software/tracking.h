@@ -7,6 +7,27 @@
  * 
  */
 #define TRACKER_POLLING 1
+/* 定时器每秒中断次数,即采样频率 2~100000 */
+#define POLLING_FREQ 500
+
+/* 状态切换模式的状态数 */
+#define STATE_NUM 1
+
+/* 直线循迹log开关 */
+#define DEBUG_STRAIGHT 1
+#if DEBUG_STRAIGHT
+#define DEBUG_STRAIGHT_LOG(msg) Usart_SendString(USART1, msg)
+#else
+#define DEBUG_STRAIGHT_LOG(msg)
+#endif
+/* 向右修正时舵机角度 */
+#define S_RIGHTWARD 0
+/* 向左修正时舵机角度 */
+#define S_LEFTWARD 0
+/* 向右修正时差速PWM值 即左比右快的值 */
+#define RIGHTWARD_ADD 0
+/* 向左修正时差速PWM值 即右比左快的值 */
+#define LEFTWARD_ADD 0
 
 /* 比例 */
 #define KP 1
@@ -53,5 +74,8 @@ void TIM3_tracker_init_polling(void);
 void NVIC_tracker_init_polling(void);
 void USART_sendinfo(void);
 int32_t caclu_pid(void);
+
+void stateswitcher(void);
+void tracking_straight(void);
 
 #endif

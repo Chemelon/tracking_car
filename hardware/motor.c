@@ -1,60 +1,36 @@
 #include "motor.h"
 #include "stm32f10x.h"
 #include "pwm.h"
-
-#define MOTOR_PWMP_LEFT (TIM2->CCR1)
-#define MOTOR_PWMN_LEFT (TIM2->CCR2)
-#define MOTOR_PWMP_RIGHT (TIM2->CCR3)
-#define MOTOR_PWMN_RIGHT (TIM2->CCR4)
-
-/* 设置TIM1 CCR4 改变占空比从而控制舵机 */
-#define MOTOR_SERVO_CCR (TIM1->CCR4)
-
 /* 舵机相关函数 */
-#ifndef __SERVO_FUNC
-
 /**
- * @brief 舵机直线方向
- *
+ * @brief 调节占空比
+ * 
+ * @param CCR_value 占空比(CCR)值(0~20000)
  */
-static void servo_straight(void)
+void servo_set_dutyclcle(uint16_t CCR_value)
 {
-    MOTOR_SERVO_CCR = K_SERVO_STRBASE;
+    S_PWM_CCR = CCR_value;
 }
 
 /**
- * @brief 舵机左转
- *
- * @param angle 转动角度 在函数内换算成PWM占空比
+ * @brief 将角度换算为占空比
+ * 
+ * @param angle 角度
  */
-void servo_turnleft(uint16_t angle)
+void servo_setangle(uint16_t angle)
 {
-    MOTOR_SERVO_CCR = -(angle * 100 / K_SERVO_TURNLEFT) + K_SERVO_STRBASE;
+    S_PWM_CCR = (uint16_t)((angle / 180.0f) * S_PWM_CCR_180 + S_PWM_CCR_0);
 }
 
-/**
- * @brief 舵机右转
- *
- * @param angle 转动角度 在函数内换算成PWM占空比
- */
-void servo_turnright(uint16_t angle)
-{
-    MOTOR_SERVO_CCR = (angle * 100 / K_SERVO_TURNRIGHT) + K_SERVO_STRBASE;
-}
-
-#endif
-
-/* 减速电机相关函数 */
-#ifndef __MOTOR_FUNC
 /**
  * @brief 左轮停车
  *
  */
-static void motor_setstop_left(void)
+void motor_setstop_left(void)
 {
     /* 改变PWM_CCR 的值从而改变占空比 */
-    MOTOR_PWMP_LEFT = 0;
-    MOTOR_PWMN_LEFT = 0;
+    M_PWM_LEFT_P = 0;
+    M_PWM_LEFT_N = 0;
 }
 
 /**
@@ -64,30 +40,30 @@ static void motor_setstop_left(void)
 static void motor_setstop_right(void)
 {
     /* 改变PWM_CCR 的值从而改变占空比 */
-    MOTOR_PWMP_RIGHT = 0;
-    MOTOR_PWMN_RIGHT = 0;
+    M_PWM_RIGHT_P = 0;
+    M_PWM_RIGHT_N = 0;
 }
 
 /**
  * @brief 左轮刹车
  *
  */
-static void motor_setbrake_left(void)
+void motor_setbrake_left(void)
 {
     /* 改变PWM_CCR 的值从而改变占空比 */
-    MOTOR_PWMP_LEFT = 0xffff;
-    MOTOR_PWMN_LEFT = 0xffff;
+    M_PWM_LEFT_P = 0xffff;
+    M_PWM_LEFT_N = 0xffff;
 }
 
 /**
  * @brief 右轮刹车
  *
  */
-static void motor_setbrake_right(void)
+void motor_setbrake_right(void)
 {
     /* 改变PWM_CCR 的值从而改变占空比 */
-    MOTOR_PWMP_RIGHT = 0xffff;
-    MOTOR_PWMN_RIGHT = 0xffff;
+    M_PWM_RIGHT_P = 0xffff;
+    M_PWM_RIGHT_N = 0xffff;
 }
 
 /**
@@ -95,11 +71,11 @@ static void motor_setbrake_right(void)
  *
  * @param pwm_ccr_val 前进速度(PWM占空比)
  */
-static void motor_setforward_left(uint16_t pwm_ccr_val)
+void motor_setforward_left(uint16_t pwm_ccr_val)
 {
     /* 改变PWM_CCR 的值从而改变占空比 */
-    MOTOR_PWMP_LEFT = pwm_ccr_val;
-    MOTOR_PWMN_LEFT = 0;
+    M_PWM_LEFT_P = pwm_ccr_val;
+    M_PWM_LEFT_N = 0;
 }
 
 /**
@@ -107,11 +83,11 @@ static void motor_setforward_left(uint16_t pwm_ccr_val)
  *
  * @param pwm_ccr_val 前进速度(PWM占空比)
  */
-static void motor_setforward_right(uint16_t pwm_ccr_val)
+void motor_setforward_right(uint16_t pwm_ccr_val)
 {
     /* 改变PWM_CCR 的值从而改变占空比 */
-    MOTOR_PWMP_RIGHT = pwm_ccr_val;
-    MOTOR_PWMN_RIGHT = 0;
+    M_PWM_RIGHT_P = pwm_ccr_val;
+    M_PWM_RIGHT_N = 0;
 }
 
 /**
@@ -119,11 +95,11 @@ static void motor_setforward_right(uint16_t pwm_ccr_val)
  *
  * @param pwm_ccr_val 后退速度(PWM占空比)
  */
-static void motor_setbackward_left(uint16_t pwm_ccr_val)
+void motor_setbackward_left(uint16_t pwm_ccr_val)
 {
     /* 改变PWM_CCR 的值从而改变占空比 */
-    MOTOR_PWMP_LEFT = 0;
-    MOTOR_PWMN_LEFT = pwm_ccr_val;
+    M_PWM_LEFT_P = 0;
+    M_PWM_LEFT_N = pwm_ccr_val;
 }
 
 /**
@@ -131,12 +107,16 @@ static void motor_setbackward_left(uint16_t pwm_ccr_val)
  *
  * @param pwm_ccr_val 后退速度(PWM占空比)
  */
-static void motor_setbackward_right(uint16_t pwm_ccr_val)
+void motor_setbackward_right(uint16_t pwm_ccr_val)
 {
     /* 改变PWM_CCR 的值从而改变占空比 */
-    MOTOR_PWMP_RIGHT = 0;
-    MOTOR_PWMN_RIGHT = pwm_ccr_val;
+    M_PWM_RIGHT_P = 0;
+    M_PWM_RIGHT_N = pwm_ccr_val;
 }
+
+/* ************************************************ */
+
+/* ************************************************ */
 
 /**
  * @brief 后退
@@ -145,10 +125,9 @@ static void motor_setbackward_right(uint16_t pwm_ccr_val)
  */
 void goback(uint16_t speed)
 {
-    /* 舵机转向直线方向 */
-    servo_straight();
-    motor_setforward_left(MOTOR_PWMBASE_LEFT + speed);
-    motor_setforward_right(MOTOR_PWMBASH_RIGHT + speed);
+    /* 新车和原车正好相反 */
+    motor_setforward_left(PWMBASE_LEFT + speed);
+    motor_setforward_right(PWMBASH_RIGHT + speed);
 }
 
 /**
@@ -158,65 +137,26 @@ void goback(uint16_t speed)
  */
 void gostraight(uint16_t speed)
 {
-    /* 舵机转向直线方向 */
-    servo_straight();
-    motor_setbackward_left(MOTOR_PWMBASE_LEFT + speed);
-    motor_setbackward_right(MOTOR_PWMBASH_RIGHT + speed);
+    motor_setbackward_left(PWMBASE_LEFT + speed);
+    motor_setbackward_right(PWMBASH_RIGHT + speed);
 }
 
 /**
- * @brief 差速左转 通过设置左右电机不同转速实现转弯
+ * @brief 刹车
  *
- * @param speed 转弯速度 值越大转得越快
  */
-static void motor_diffal_turnleft(uint16_t speed)
+void brake(void)
 {
-    /* 差速转向 */
-    motor_setforward_left(MOTOR_PWMBASE_LEFT + speed);
-    motor_setforward_right(MOTOR_PWMBASH_RIGHT + speed + K_MOTOR_TURNLEFT);
+    motor_setbrake_left();
+    motor_setbrake_right();
 }
 
 /**
- * @brief 差速左转 通过设置左右电机不同转速实现转弯
+ * @brief 停车
  *
- * @param speed 转弯速度 值越大转得越快
  */
-static void motor_diffal_turnright(uint16_t speed)
-{
-    /* 差速转向 */
-    motor_setforward_left(MOTOR_PWMBASE_LEFT + speed + K_MOTOR_TURNRIGHT);
-    motor_setforward_right(MOTOR_PWMBASH_RIGHT + speed);
-}
-
-/**
- * @brief 左转 根据实际情况决定是否使用电机差速辅助转弯
- *
- * @param angle 左转角度
- */
-void turnleft(uint16_t angle)
-{
-    servo_turnleft(angle);
-#if DIFFAL_SUP
-    motor_diffal_turnleft(K_DIFFAL_SUP_SPEED);
-#endif
-}
-
-/**
- * @brief 右转 根据实际情况决定是否使用电机差速辅助转弯
- *
- * @param angle 右转角度
- */
-void turnright(uint16_t angle)
-{
-    servo_turnright(angle);
-#if DIFFAL_SUP
-    motor_diffal_turnright(K_DIFFAL_SUP_SPEED);
-#endif
-}
-
 void stop(void)
 {
     motor_setstop_right();
     motor_setstop_left();
 }
-#endif
