@@ -502,7 +502,7 @@ typedef __I int8_t vsc8;   /*!< Read Only */
 
 typedef uint32_t  u32;
 typedef uint16_t u16;
-typedef uint8_t  u8;
+typedef uint8_t  uint8_t;
 
 typedef const uint32_t uc32;  /*!< Read Only */
 typedef const uint16_t uc16;  /*!< Read Only */
