@@ -24,27 +24,27 @@ int main(void)
     NVIC_tracker_init();
 #endif
     Usart_SendString(DEBUG_USARTx, "system inited\r\n");
+
+
+
     servo_set_dutyclcle(2500);
     stop();
-    
-    //gostraight(0);
-    //for(;;){}
-    stateswitcher();
-    int i = 0;
-    for (;;)
-    {
 
+
+
+    stateswitcher();    
+    /* TODO: 舵机的角度对应关系还没有调好 */
+    for (int i = 0;;i+=250)
+    {
         Delay_ms(500);
         servo_set_dutyclcle(i);
-        printf("%d",i);
-        i += 250;
+        printf("%d\r\n",i);
         if (i > 4500)
         {
             i = 0;
         }
         // Usart_SendString(DEBUG_USARTx, "running\r\n");
     }
-    return 0;
 }
 
 void DEBUG_USART_IRQHandler(void)

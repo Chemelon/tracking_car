@@ -6,8 +6,8 @@
 #include <stdio.h>
 
 #define FUNC_0X00 tracking_straight
-#define FUNC_0X01 NULL
-#define FUNC_0X02 NULL
+#define FUNC_0X01 tracking_left
+#define FUNC_0X02 tracking_right
 #define FUNC_0X03 NULL
 #define FUNC_0X04 NULL
 #define FUNC_0X05 NULL

@@ -35,7 +35,14 @@
 #define GPIOB_IDR_BIT7 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 7 * 4))
 #define GPIOB_IDR_BIT8 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 8 * 4))
 
-volatile static tracker_type tracker_status = {tracker_resloved, 0, 0, 0, 0, 0, 0, 0};
+enum tracker_color
+{
+    t_color_white,
+    t_color_black
+
+};
+
+volatile static tracker_type tracker_status = {status_resloved, 0, 0, 0, 0, 0, 0, 0};
 volatile tracker_type *ptracker_status = &tracker_status;
 
 /**
@@ -51,12 +58,12 @@ void EXTI4_IRQHandler(void)
 {
     EXTI->PR = (EXTI->PR & EXTI_Line4) ? EXTI_Line4 : 0;
     /* 将光电管的状态保存至内存 */
-    tracker_status.update = tracker_updated;
-    tracker_status.tarcker1_status = GPIOB_IDR_BIT5;
-    tracker_status.tarcker2_status = GPIOB_IDR_BIT7;
-    tracker_status.tarcker3_status = GPIOB_IDR_BIT6;
-    tracker_status.tarcker4_status = GPIOB_IDR_BIT4;
-    tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
+    tracker_status.update = status_updated;
+    tracker_status.tarcker1 = GPIOB_IDR_BIT5;
+    tracker_status.tarcker2 = GPIOB_IDR_BIT7;
+    tracker_status.tarcker3 = GPIOB_IDR_BIT6;
+    tracker_status.tarcker4 = GPIOB_IDR_BIT4;
+    tracker_status.tarcker5 = GPIOB_IDR_BIT8;
     // Usart_SendString(DEBUG_USARTx, "ext4\r\n");
 }
 
@@ -72,12 +79,12 @@ void EXTI9_5_IRQHandler(void)
     EXTI->PR = (EXTI->PR & EXTI_Line7) ? EXTI_Line7 : 0;
     EXTI->PR = (EXTI->PR & EXTI_Line8) ? EXTI_Line8 : 0;
     /* 将光电管的状态保存至内存 */
-    tracker_status.update = tracker_updated;
-    tracker_status.tarcker1_status = GPIOB_IDR_BIT5;
-    tracker_status.tarcker2_status = GPIOB_IDR_BIT7;
-    tracker_status.tarcker3_status = GPIOB_IDR_BIT6;
-    tracker_status.tarcker4_status = GPIOB_IDR_BIT4;
-    tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
+    tracker_status.update = status_updated;
+    tracker_status.tarcker1 = GPIOB_IDR_BIT5;
+    tracker_status.tarcker2 = GPIOB_IDR_BIT7;
+    tracker_status.tarcker3 = GPIOB_IDR_BIT6;
+    tracker_status.tarcker4 = GPIOB_IDR_BIT4;
+    tracker_status.tarcker5 = GPIOB_IDR_BIT8;
     // Usart_SendString(DEBUG_USARTx, "ext5-9\r\n");
 }
 
@@ -176,22 +183,22 @@ void NVIC_tracker_init(void)
 void TIM3_IRQHandler(void)
 {
     TIM3->SR = ~TIM_SR_UIF;
-    if (tracker_status.tracker_cnt_it > 10)
+    if (tracker_status.tracker_cnt_it > POLLING_CNT)
     {
         /* 关闭计数器 */
         TIM3->CR1 &= ~TIM_CR1_CEN;
         /* 通知更新 */
-        tracker_status.update = tracker_updated;
+        tracker_status.update = status_updated;
         return;
     }
     {
         /* 将光电管的状态保存至内存 */
-        // tracker_status.update = tracker_updated;
-        tracker_status.tarcker1_status = GPIOB_IDR_BIT5;
-        tracker_status.tarcker2_status = GPIOB_IDR_BIT7; // 1
-        tracker_status.tarcker3_status = GPIOB_IDR_BIT6; // 1
-        tracker_status.tarcker4_status = GPIOB_IDR_BIT4; // 1
-        tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
+        // tracker_status.update = status_updated;
+        tracker_status.tarcker1 = GPIOB_IDR_BIT5;
+        tracker_status.tarcker2 = GPIOB_IDR_BIT7; // 1
+        tracker_status.tarcker3 = GPIOB_IDR_BIT6; // 1
+        tracker_status.tarcker4 = GPIOB_IDR_BIT4; // 1
+        tracker_status.tarcker5 = GPIOB_IDR_BIT8;
         /* 将光电管的状态保存至内存 */
         tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
         tracker_status.tracker_cnt_it++;
@@ -278,13 +285,13 @@ void tracking_resume(void)
     /* 复位计数值 */
     ptracker_status->tracker_cnt_it = 0;
     /* 更新状态 */
-    ptracker_status->update = tracker_resloved;
+    ptracker_status->update = status_resloved;
     /* 复位CNT */
     TIM3->CNT = 0;
     /* 使能定时器 */
     TIM3->CR1 |= TIM_CR1_CEN;
 #else
-    ptracker_status->update = tracker_resloved;
+    ptracker_status->update = status_resloved;
 #endif
 }
 
@@ -292,17 +299,17 @@ void tracking_resume(void)
  * @brief 通过串口发送光电管状态 DEBUG 用
  *
  */
-void USART_sendinfo(void)
+void tracker_sendinfo(void)
 {
-    if (ptracker_status->update == tracker_updated)
+    if (ptracker_status->update == status_updated)
     {
-        Usart_SendString(DEBUG_USARTx, ((ptracker_status->tarcker1_status) ? "1 " : "0 "));
-        Usart_SendString(DEBUG_USARTx, ((ptracker_status->tarcker2_status) ? "1 " : "0 "));
-        Usart_SendString(DEBUG_USARTx, ((ptracker_status->tarcker3_status) ? "1 " : "0 "));
-        Usart_SendString(DEBUG_USARTx, ((ptracker_status->tarcker4_status) ? "1 " : "0 "));
-        Usart_SendString(DEBUG_USARTx, ((ptracker_status->tarcker5_status) ? "1 " : "0 "));
+        Usart_SendString(DEBUG_USARTx, (TRACKER1_STATUS ? "1 " : "0 "));
+        Usart_SendString(DEBUG_USARTx, (TRACKER2_STATUS ? "1 " : "0 "));
+        Usart_SendString(DEBUG_USARTx, (TRACKER3_STATUS ? "1 " : "0 "));
+        Usart_SendString(DEBUG_USARTx, (TRACKER4_STATUS ? "1 " : "0 "));
+        Usart_SendString(DEBUG_USARTx, (TRACKER5_STATUS ? "1 " : "0 "));
         /* 取得累计值 */
-        printf("total: %d \r\n", ptracker_status->tracker_sum_signed);
+        // printf("total: %d \r\n", ptracker_status->tracker_sum_signed);
         /* 更新状态 */
         tracking_resume();
     }
@@ -331,65 +338,107 @@ int32_t caclu_pid(void)
  */
 void stateswitcher(void)
 {
-    static uint8_t state_list[STATE_NUM] =
+    static uint8_t status_list[STATE_NUM] =
         {
-            0x00,0x10,
+            STATUS_MEMBER
         };
     for (int i = 0; i < STATE_NUM; i++)
     {
-        FunList_Call(state_list[i]);
+        FunList_Call(status_list[i]);
     }
+    stop();
 }
 
-#define TRACKER_STATUS1 (ptracker_status->tarcker1_status)
-#define TRACKER_STATUS2 (ptracker_status->tarcker2_status)
-#define TRACKER_STATUS3 (ptracker_status->tarcker3_status)
-#define TRACKER_STATUS4 (ptracker_status->tarcker4_status)
-#define TRACKER_STATUS5 (ptracker_status->tarcker5_status)
-/**
- * @brief 直线循迹
- *
- */
+/* 直线循迹 */
 void tracking_straight(void)
 {
+    /* TODO:找到舵机角度和pwm占空比关系 */
+    //servo_setangle(S_STRAIGHTWARD);
     for (;;)
     {
-        if (ptracker_status->update == tracker_resloved)
+        if (ptracker_status->update == status_resloved)
         {
-            //DEBUG_STRAIGHT_LOG("STRAIGHTING\r\n");
+            // STRAIGHT_LOG("STRAIGHTING\r\n");
             continue;
         }
-        /*  */
-        if(TRACKER_STATUS1 == 1 || TRACKER_STATUS5 == 1)
+        /* 退出循环所需满足的条件 TODO:有时候场地脏污使得错误识别提前退出,需要比较苛刻的约束,以后具体调试 */
+        if (TRACKER1_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
         {
+            /* 并且要满足 中间左右与同侧边灯同色 减少误判*/
+            if(TRACKER3_STATUS == t_color_black && (TRACKER2_STATUS == TRACKER1_STATUS || TRACKER4_STATUS == TRACKER5_STATUS))
+            /* LOG 一下退出时的光电数据 */
+            tracker_sendinfo();
+            tracking_resume();
+            STRAIGHT_LOG("STRAITHTEXIT\r\n");
             break;
         }
-        //DEBUG_STRAIGHT_LOG("UPDATED\r\n");
-        if (TRACKER_STATUS4 == 1)
+        // STRAIGHT_LOG("UPDATED\r\n");
+        if (TRACKER4_STATUS == t_color_black)
         {
             /* 偏左 向右修正*/
             //servo_setangle(S_RIGHTWARD);
             motor_setforward_left(PWMBASE_LEFT + RIGHTWARD_ADD);
             motor_setforward_right(PWMBASH_RIGHT);
-            DEBUG_STRAIGHT_LOG("RIGHTWARD\r\n");
+            STRAIGHT_LOG("RIGHTWARD\r\n");
         }
-        else if (TRACKER_STATUS2 == 1)
+        else if (TRACKER2_STATUS == t_color_black)
         {
             /* 偏右 向左修正*/
             //servo_setangle(S_LEFTWARD);
             motor_setforward_left(PWMBASE_LEFT);
             motor_setforward_right(PWMBASH_RIGHT + LEFTWARD_ADD);
-            DEBUG_STRAIGHT_LOG("LEFTWARD\r\n");
+            STRAIGHT_LOG("LEFTWARD\r\n");
         }
         tracking_resume();
     }
 }
 
-/* 巡线左转 */
+/* 巡线90度左转 */
 void tracking_left(void)
 {
-    for(;;)
+    /* 向左大转弯 右轮加速左轮减速 */
+    // servo_setangle(S_LEFT90);
+    motor_setforward_left(PWMBASE_LEFT - LEFTTURN_SUB);
+    motor_setforward_right(PWMBASH_RIGHT + LEFTTURN_ADD);
+    for (;;)
     {
+        if (ptracker_status->update == status_resloved)
+        {
+            // TRACKLEFT90_LOG("LEFT90TURNING\r\n");
+            continue;
+        }
+        /* 中心和靠外圈的光电均为黑色退出转弯模式 */
+        if(TRACKER3_STATUS == t_color_black && TRACKER2_STATUS == t_color_black)
+        {
+            tracker_sendinfo();
+            tracking_resume();
+            TRACKLEFT90_LOG("LEFT90EXIT");
+            break;
+        }
+    }
+}
 
+/* 巡线90度右转 */
+void tracking_right(void)
+{
+    /* 向右大转弯 左轮加速右轮减速 */
+    // servo_setangle(S_RIGHT90);
+    motor_setforward_left(PWMBASE_LEFT + LEFTTURN_SUB);
+    motor_setforward_right(PWMBASH_RIGHT + LEFTTURN_ADD);
+    for (;;)
+    {
+        if (ptracker_status->update == status_resloved)
+        {
+            // TRACKRIGHT90_LOG("RIGHT90TURNING\r\n");
+            continue;
+        }
+        /* 中心和靠外圈的光电均为黑色退出转弯模式 */
+        if(TRACKER3_STATUS == t_color_black && TRACKER1_STATUS == t_color_black)
+        {
+            tracker_sendinfo();
+            tracking_resume();
+            TRACKRIGHT90_LOG("RIGHT90EXIT");
+            break;
+        }
     }
 }
