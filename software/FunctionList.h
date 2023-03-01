@@ -1,6 +1,7 @@
 #ifndef __FUNCLIST_H__
 #define __FUNCLIST_H__
 #include "stm32f10x.h"
+#include "motor.h"
 #include "tracking.h"
 #include <stdio.h>
 
@@ -14,6 +15,17 @@
 #define FUNC_0X07 NULL
 #define FUNC_0X08 NULL
 #define FUNC_0X09 NULL
+
+#define FUNC_0X10 stop
+#define FUNC_0X11 NULL
+#define FUNC_0X12 NULL
+#define FUNC_0X13 NULL
+#define FUNC_0X14 NULL
+#define FUNC_0X15 NULL
+#define FUNC_0X16 NULL
+#define FUNC_0X17 NULL
+#define FUNC_0X18 NULL
+#define FUNC_0X19 NULL
 
 
 void FunList_Call(uint8_t code);

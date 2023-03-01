@@ -24,11 +24,25 @@ int main(void)
     NVIC_tracker_init();
 #endif
     Usart_SendString(DEBUG_USARTx, "system inited\r\n");
-    // stateswitcher();
+    servo_set_dutyclcle(2500);
+    stop();
+    
+    //gostraight(0);
+    //for(;;){}
+    stateswitcher();
+    int i = 0;
     for (;;)
     {
+
         Delay_ms(500);
-        //Usart_SendString(DEBUG_USARTx, "running\r\n");
+        servo_set_dutyclcle(i);
+        printf("%d",i);
+        i += 250;
+        if (i > 4500)
+        {
+            i = 0;
+        }
+        // Usart_SendString(DEBUG_USARTx, "running\r\n");
     }
     return 0;
 }

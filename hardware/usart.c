@@ -22,7 +22,7 @@
  * @param  无
  * @retval 无
  */
-#if 1
+#if 0
 static void NVIC_Configuration(void)
 {
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -83,11 +83,12 @@ void USART_Config(void)
     // 完成串口的初始化配置
     USART_Init(DEBUG_USARTx, &USART_InitStructure);
 
+/* TODO: 貌似串口受到干扰，没有数据也进中断 */
     // 串口中断优先级配置
-    NVIC_Configuration();
+    //NVIC_Configuration();
 
     // 使能串口接收中断
-    USART_ITConfig(DEBUG_USARTx, USART_IT_RXNE, ENABLE);
+    //USART_ITConfig(DEBUG_USARTx, USART_IT_RXNE, ENABLE);
 
     // 使能串口
     USART_Cmd(DEBUG_USARTx, ENABLE);

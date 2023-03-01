@@ -5,7 +5,7 @@
 /**
  * @brief 调节占空比
  * 
- * @param CCR_value 占空比(CCR)值(0~20000)
+ * @param CCR_value 占空比(CCR)值(0~20000) 每单位1us
  */
 void servo_set_dutyclcle(uint16_t CCR_value)
 {
@@ -67,30 +67,6 @@ void motor_setbrake_right(void)
 }
 
 /**
- * @brief 左轮前进
- *
- * @param pwm_ccr_val 前进速度(PWM占空比)
- */
-void motor_setforward_left(uint16_t pwm_ccr_val)
-{
-    /* 改变PWM_CCR 的值从而改变占空比 */
-    M_PWM_LEFT_P = pwm_ccr_val;
-    M_PWM_LEFT_N = 0;
-}
-
-/**
- * @brief 右轮前进
- *
- * @param pwm_ccr_val 前进速度(PWM占空比)
- */
-void motor_setforward_right(uint16_t pwm_ccr_val)
-{
-    /* 改变PWM_CCR 的值从而改变占空比 */
-    M_PWM_RIGHT_P = pwm_ccr_val;
-    M_PWM_RIGHT_N = 0;
-}
-
-/**
  * @brief 左轮后退
  *
  * @param pwm_ccr_val 后退速度(PWM占空比)
@@ -98,8 +74,8 @@ void motor_setforward_right(uint16_t pwm_ccr_val)
 void motor_setbackward_left(uint16_t pwm_ccr_val)
 {
     /* 改变PWM_CCR 的值从而改变占空比 */
-    M_PWM_LEFT_P = 0;
-    M_PWM_LEFT_N = pwm_ccr_val;
+    M_PWM_LEFT_P = pwm_ccr_val;
+    M_PWM_LEFT_N = 0;
 }
 
 /**
@@ -108,6 +84,30 @@ void motor_setbackward_left(uint16_t pwm_ccr_val)
  * @param pwm_ccr_val 后退速度(PWM占空比)
  */
 void motor_setbackward_right(uint16_t pwm_ccr_val)
+{
+    /* 改变PWM_CCR 的值从而改变占空比 */
+    M_PWM_RIGHT_P = pwm_ccr_val;
+    M_PWM_RIGHT_N = 0;
+}
+
+/**
+ * @brief 左轮前进
+ *
+ * @param pwm_ccr_val 前进速度(PWM占空比)
+ */
+void motor_setforward_left(uint16_t pwm_ccr_val)
+{
+    /* 改变PWM_CCR 的值从而改变占空比 */
+    M_PWM_LEFT_P = 0;
+    M_PWM_LEFT_N = pwm_ccr_val;
+}
+
+/**
+ * @brief 右轮前进
+ *
+ * @param pwm_ccr_val 前进速度(PWM占空比)
+ */
+void motor_setforward_right(uint16_t pwm_ccr_val)
 {
     /* 改变PWM_CCR 的值从而改变占空比 */
     M_PWM_RIGHT_P = 0;
@@ -137,8 +137,8 @@ void goback(uint16_t speed)
  */
 void gostraight(uint16_t speed)
 {
-    motor_setbackward_left(PWMBASE_LEFT + speed);
-    motor_setbackward_right(PWMBASH_RIGHT + speed);
+    motor_setforward_left(PWMBASE_LEFT + speed);
+    motor_setforward_right(PWMBASH_RIGHT + speed);
 }
 
 /**

@@ -11,7 +11,7 @@
 #define POLLING_FREQ 500
 
 /* 状态切换模式的状态数 */
-#define STATE_NUM 1
+#define STATE_NUM 2
 
 /* 直线循迹log开关 */
 #define DEBUG_STRAIGHT 1
@@ -25,9 +25,18 @@
 /* 向左修正时舵机角度 */
 #define S_LEFTWARD 0
 /* 向右修正时差速PWM值 即左比右快的值 */
-#define RIGHTWARD_ADD 0
+#define RIGHTWARD_ADD 2500
 /* 向左修正时差速PWM值 即右比左快的值 */
-#define LEFTWARD_ADD 0
+#define LEFTWARD_ADD 1500
+
+/* 寻线左转log开关 */
+#define DEBUG_TRACKLEFT 1
+#if DEBUG_TRACKLEFT
+#define DEBUG_TRACKLEFT_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
+#else
+#define DEBUG_TRACKLEFT_LOG(msg)
+#endif
+
 
 /* 比例 */
 #define KP 1

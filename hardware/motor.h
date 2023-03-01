@@ -15,8 +15,10 @@
 #define S_PWM_CCR_180 2         //180 度时PWM占空比
 
 /* 电机PWM输出基准值,此状态为小车以一个合适的速度前进 */
-#define PWMBASE_LEFT 3400
-#define PWMBASH_RIGHT 3500
+//从车尾看去这个是右轮
+#define PWMBASE_LEFT 5500
+//从车尾看去这个是左轮
+#define PWMBASH_RIGHT 1700
 
 void servo_set_dutyclcle(uint16_t CCR_value);
 void servo_setangle(uint16_t angle);

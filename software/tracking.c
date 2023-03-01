@@ -245,7 +245,7 @@ void TIM3_tracker_init_polling(void)
     TIM3->PSC = (FCK_FREQ / CKCNT_FREQ - 1);
     /* 清空计数器 */
     TIM3->CNT = 0;
-    /* 500 Hz (200)*/
+    /* 500 Hz */
     TIM3->ARR = CKCNT_FREQ / TARGET_FREQ - 1;
     /* 开启更新中断 */
     TIM3->DIER |= TIM_DIER_UIE;
@@ -333,7 +333,7 @@ void stateswitcher(void)
 {
     static uint8_t state_list[STATE_NUM] =
         {
-            0x00,
+            0x00,0x10,
         };
     for (int i = 0; i < STATE_NUM; i++)
     {
@@ -341,6 +341,11 @@ void stateswitcher(void)
     }
 }
 
+#define TRACKER_STATUS1 (ptracker_status->tarcker1_status)
+#define TRACKER_STATUS2 (ptracker_status->tarcker2_status)
+#define TRACKER_STATUS3 (ptracker_status->tarcker3_status)
+#define TRACKER_STATUS4 (ptracker_status->tarcker4_status)
+#define TRACKER_STATUS5 (ptracker_status->tarcker5_status)
 /**
  * @brief 直线循迹
  *
@@ -351,26 +356,40 @@ void tracking_straight(void)
     {
         if (ptracker_status->update == tracker_resloved)
         {
-            DEBUG_STRAIGHT_LOG("STRAIGHTING\r\n");
+            //DEBUG_STRAIGHT_LOG("STRAIGHTING\r\n");
             continue;
         }
-        DEBUG_STRAIGHT_LOG("UPDATED\r\n");
-        if (ptracker_status->tarcker2_status == 1)
+        /*  */
+        if(TRACKER_STATUS1 == 1 || TRACKER_STATUS5 == 1)
+        {
+            break;
+        }
+        //DEBUG_STRAIGHT_LOG("UPDATED\r\n");
+        if (TRACKER_STATUS4 == 1)
         {
             /* 偏左 向右修正*/
-            servo_setangle(S_RIGHTWARD);
+            //servo_setangle(S_RIGHTWARD);
             motor_setforward_left(PWMBASE_LEFT + RIGHTWARD_ADD);
             motor_setforward_right(PWMBASH_RIGHT);
             DEBUG_STRAIGHT_LOG("RIGHTWARD\r\n");
         }
-        else if (ptracker_status->tarcker4_status == 1)
+        else if (TRACKER_STATUS2 == 1)
         {
             /* 偏右 向左修正*/
-            servo_setangle(S_LEFTWARD);
+            //servo_setangle(S_LEFTWARD);
             motor_setforward_left(PWMBASE_LEFT);
             motor_setforward_right(PWMBASH_RIGHT + LEFTWARD_ADD);
             DEBUG_STRAIGHT_LOG("LEFTWARD\r\n");
         }
         tracking_resume();
+    }
+}
+
+/* 巡线左转 */
+void tracking_left(void)
+{
+    for(;;)
+    {
+
     }
 }
