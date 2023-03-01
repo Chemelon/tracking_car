@@ -57,7 +57,7 @@ void EXTI4_IRQHandler(void)
     tracker_status.tarcker3_status = GPIOB_IDR_BIT6;
     tracker_status.tarcker4_status = GPIOB_IDR_BIT4;
     tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
-    // Usart_SendString(USART1, "ext4\r\n");
+    // Usart_SendString(DEBUG_USARTx, "ext4\r\n");
 }
 
 /**
@@ -78,7 +78,7 @@ void EXTI9_5_IRQHandler(void)
     tracker_status.tarcker3_status = GPIOB_IDR_BIT6;
     tracker_status.tarcker4_status = GPIOB_IDR_BIT4;
     tracker_status.tarcker5_status = GPIOB_IDR_BIT8;
-    // Usart_SendString(USART1, "ext5-9\r\n");
+    // Usart_SendString(DEBUG_USARTx, "ext5-9\r\n");
 }
 
 /**
@@ -176,7 +176,7 @@ void NVIC_tracker_init(void)
 void TIM3_IRQHandler(void)
 {
     TIM3->SR = ~TIM_SR_UIF;
-    if (tracker_status.tracker_cnt_it > 110)
+    if (tracker_status.tracker_cnt_it > 10)
     {
         /* 关闭计数器 */
         TIM3->CR1 &= ~TIM_CR1_CEN;
@@ -296,78 +296,81 @@ void USART_sendinfo(void)
 {
     if (ptracker_status->update == tracker_updated)
     {
-        Usart_SendString(USART1, ((ptracker_status->tarcker1_status) ? "1 " : "0 "));
-        Usart_SendString(USART1, ((ptracker_status->tarcker2_status) ? "1 " : "0 "));
-        Usart_SendString(USART1, ((ptracker_status->tarcker3_status) ? "1 " : "0 "));
-        Usart_SendString(USART1, ((ptracker_status->tarcker4_status) ? "1 " : "0 "));
-        Usart_SendString(USART1, ((ptracker_status->tarcker5_status) ? "1 " : "0 "));
+        Usart_SendString(DEBUG_USARTx, ((ptracker_status->tarcker1_status) ? "1 " : "0 "));
+        Usart_SendString(DEBUG_USARTx, ((ptracker_status->tarcker2_status) ? "1 " : "0 "));
+        Usart_SendString(DEBUG_USARTx, ((ptracker_status->tarcker3_status) ? "1 " : "0 "));
+        Usart_SendString(DEBUG_USARTx, ((ptracker_status->tarcker4_status) ? "1 " : "0 "));
+        Usart_SendString(DEBUG_USARTx, ((ptracker_status->tarcker5_status) ? "1 " : "0 "));
         /* 取得累计值 */
         printf("total: %d \r\n", ptracker_status->tracker_sum_signed);
         /* 更新状态 */
         tracking_resume();
     }
+}
 
-    int32_t caclu_pid(void)
-    {
-        /* 上个误差值以及上上个误差值 */
-        static int err_priv1 = 0, err_priv2 = 0;
-        int err_curr;
-        int pid_delta;
-        /* tracker_sum_signed 是一个-10~10 的数 */
-        err_curr = tracker_status.tracker_sum_signed;
+int32_t caclu_pid(void)
+{
+    /* 上个误差值以及上上个误差值 */
+    static int err_priv1 = 0, err_priv2 = 0;
+    int err_curr;
+    int pid_delta;
+    /* tracker_sum_signed 是一个-10~10 的数 */
+    err_curr = tracker_status.tracker_sum_signed;
 
-        pid_delta = (KP * (err_curr - err_priv1)) + (KI * (err_curr)) + (KD * (err_curr - 2 * err_priv1 + err_priv2));
+    pid_delta = (KP * (err_curr - err_priv1)) + (KI * (err_curr)) + (KD * (err_curr - 2 * err_priv1 + err_priv2));
 
-        err_priv2 = err_priv1;
-        err_priv1 = err_curr;
+    err_priv2 = err_priv1;
+    err_priv1 = err_curr;
 
-        return pid_delta;
-    }
+    return pid_delta;
+}
 
-    /**
-     * @brief 状态切换器 按照顺序切换状态
-     *
-     */
-    void stateswitcher(void)
-    {
-        static uint8_t state_list[STATE_NUM] =
-            {
-                0x00,
-            };
-        for (int i = 0; i < STATE_NUM; i++)
+/**
+ * @brief 状态切换器 按照顺序切换状态
+ *
+ */
+void stateswitcher(void)
+{
+    static uint8_t state_list[STATE_NUM] =
         {
-            FunList_Call(state_list[i]);
-        }
-    }
-
-    /**
-     * @brief 直线循迹
-     *
-     */
-    void tracking_straight(void)
+            0x00,
+        };
+    for (int i = 0; i < STATE_NUM; i++)
     {
-        for (;;)
-        {
-            if (ptracker_status->update == tracker_resloved)
-            {
-                continue;
-            }
-            if (ptracker_status->tarcker2_status == 1)
-            {
-                /* 偏左 向右修正*/
-                servo_setangle(S_RIGHTWARD);
-                motor_setforward_left(PWMBASE_LEFT + RIGHTWARD_ADD);
-                motor_setforward_right(PWMBASH_RIGHT);
-                DEBUG_STRAIGHT_LOG("RIGHTWARD\r\n");
-            }
-            else if (ptracker_status->tarcker4_status == 1)
-            {
-                /* 偏右 向左修正*/
-                servo_setangle(S_LEFTWARD);
-                motor_setforward_left(PWMBASE_LEFT);
-                motor_setforward_right(PWMBASH_RIGHT + LEFTWARD_ADD);
-                DEBUG_STRAIGHT_LOG("LEFTWARD\r\n");
-            }
-            tracking_resume();
-        }
+        FunList_Call(state_list[i]);
     }
+}
+
+/**
+ * @brief 直线循迹
+ *
+ */
+void tracking_straight(void)
+{
+    for (;;)
+    {
+        if (ptracker_status->update == tracker_resloved)
+        {
+            DEBUG_STRAIGHT_LOG("STRAIGHTING\r\n");
+            continue;
+        }
+        DEBUG_STRAIGHT_LOG("UPDATED\r\n");
+        if (ptracker_status->tarcker2_status == 1)
+        {
+            /* 偏左 向右修正*/
+            servo_setangle(S_RIGHTWARD);
+            motor_setforward_left(PWMBASE_LEFT + RIGHTWARD_ADD);
+            motor_setforward_right(PWMBASH_RIGHT);
+            DEBUG_STRAIGHT_LOG("RIGHTWARD\r\n");
+        }
+        else if (ptracker_status->tarcker4_status == 1)
+        {
+            /* 偏右 向左修正*/
+            servo_setangle(S_LEFTWARD);
+            motor_setforward_left(PWMBASE_LEFT);
+            motor_setforward_right(PWMBASH_RIGHT + LEFTWARD_ADD);
+            DEBUG_STRAIGHT_LOG("LEFTWARD\r\n");
+        }
+        tracking_resume();
+    }
+}

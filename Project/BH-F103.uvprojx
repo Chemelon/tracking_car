@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Libraries\CMSIS;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\User;..\hardware</IncludePath>
+              <IncludePath>..\Libraries\CMSIS;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\User;..\hardware;..\software</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -616,10 +616,20 @@
               <FileType>1</FileType>
               <FilePath>..\hardware\motor.c</FilePath>
             </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>SOFTWARE</GroupName>
+          <Files>
+            <File>
+              <FileName>FunctionList.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\software\FunctionList.c</FilePath>
+            </File>
             <File>
               <FileName>tracking.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\hardware\tracking.c</FilePath>
+              <FilePath>..\software\tracking.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1235,10 +1245,20 @@
               <FileType>1</FileType>
               <FilePath>..\hardware\motor.c</FilePath>
             </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>SOFTWARE</GroupName>
+          <Files>
+            <File>
+              <FileName>FunctionList.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\software\FunctionList.c</FilePath>
+            </File>
             <File>
               <FileName>tracking.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\hardware\tracking.c</FilePath>
+              <FilePath>..\software\tracking.c</FilePath>
             </File>
           </Files>
         </Group>

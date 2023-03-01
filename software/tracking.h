@@ -16,7 +16,7 @@
 /* 直线循迹log开关 */
 #define DEBUG_STRAIGHT 1
 #if DEBUG_STRAIGHT
-#define DEBUG_STRAIGHT_LOG(msg) Usart_SendString(USART1, msg)
+#define DEBUG_STRAIGHT_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
 #else
 #define DEBUG_STRAIGHT_LOG(msg)
 #endif

@@ -22,7 +22,7 @@
  * @param  无
  * @retval 无
  */
-#if 0
+#if 1
 static void NVIC_Configuration(void)
 {
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -30,7 +30,7 @@ static void NVIC_Configuration(void)
     /* 配置USART为中断源 */
     NVIC_InitStructure.NVIC_IRQChannel = DEBUG_USART_IRQ;
     /* 抢断优先级*/
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 7;
     /* 子优先级 */
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     /* 使能中断 */
@@ -84,10 +84,10 @@ void USART_Config(void)
     USART_Init(DEBUG_USARTx, &USART_InitStructure);
 
     // 串口中断优先级配置
-    //NVIC_Configuration();
+    NVIC_Configuration();
 
     // 使能串口接收中断
-    //USART_ITConfig(DEBUG_USARTx, USART_IT_RXNE, ENABLE);
+    USART_ITConfig(DEBUG_USARTx, USART_IT_RXNE, ENABLE);
 
     // 使能串口
     USART_Cmd(DEBUG_USARTx, ENABLE);
@@ -169,9 +169,4 @@ int fgetc(FILE *f)
     while (USART_GetFlagStatus(DEBUG_USARTx, USART_FLAG_RXNE) == RESET);
 
     return (int)USART_ReceiveData(DEBUG_USARTx);
-}
-
-void USART1_DMA_config(void)
-{
-    
 }

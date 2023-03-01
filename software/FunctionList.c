@@ -13,23 +13,23 @@ _FunList_TypeDef FunList_0xh[] =
         (void *)FUNC_0X00,
         0x00,
         (void *)FUNC_0X01,
-        0,
+        0x01,
         (void *)FUNC_0X02,
-        0,
+        0x02,
         (void *)FUNC_0X03,
-        0,
+        0x03,
         (void *)FUNC_0X04,
-        0,
+        0x04,
         (void *)FUNC_0X05,
-        0,
+        0x05,
         (void *)FUNC_0X06,
-        0,
+        0x06,
         (void *)FUNC_0X07,
-        0,
+        0x07,
         (void *)FUNC_0X08,
-        0,
+        0x08,
         (void *)FUNC_0X09,
-        0,
+        0x09,
 };
 
 _FunList_TypeDef FunList_1xh[] =
@@ -272,7 +272,7 @@ _FunList_TypeDef *FunMenu[] =
 
 void FunList_Call(uint8_t code)
 {
-#define FUNC_PRT_TYPE void (*)(void)
-#define FUNC_PRT FunMenu[(code&0xf0)>>4][code&0x0f].Func
-    ((FUNC_PRT_TYPE)(FUNC_PRT))();
+#define FUNC_PTR_TYPE void (*)(void)
+#define FUNC_PTR FunMenu[(code&0xf0)>>4][code&0x0f].Func
+    ((FUNC_PTR_TYPE)(FUNC_PTR))();
 }

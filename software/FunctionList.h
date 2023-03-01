@@ -2,6 +2,7 @@
 #define __FUNCLIST_H__
 #include "stm32f10x.h"
 #include "tracking.h"
+#include <stdio.h>
 
 #define FUNC_0X00 tracking_straight
 #define FUNC_0X01 NULL

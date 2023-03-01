@@ -1,4 +1,5 @@
 #include "stm32f10x.h"
+#include "FunctionList.h"
 #include "tracking.h"
 #include "pwm.h"
 #include "SysTick.h"
@@ -22,7 +23,20 @@ int main(void)
     GPIO_tracker_init();
     NVIC_tracker_init();
 #endif
-    Usart_SendString(USART1, "system inited\r\n");
-    stateswitcher();
+    Usart_SendString(DEBUG_USARTx, "system inited\r\n");
+    // stateswitcher();
+    for (;;)
+    {
+        Delay_ms(500);
+        //Usart_SendString(DEBUG_USARTx, "running\r\n");
+    }
     return 0;
+}
+
+void DEBUG_USART_IRQHandler(void)
+{
+    if (USART_GetITStatus(DEBUG_USARTx, USART_IT_RXNE) != RESET)
+    {
+        FunList_Call(USART_ReceiveData(DEBUG_USARTx));
+    }
 }
