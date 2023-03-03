@@ -11,14 +11,14 @@
 #define S_PWM_CCR (TIM1->CCR4)
 
 /* CCR 单位为us */
-#define S_PWM_CCR_0 1           // 0 度时PWM占空比
-#define S_PWM_CCR_180 2         //180 度时PWM占空比
+#define S_PWM_CCR_0 500           // 0 度时PWM占空比
+#define S_PWM_CCR_180 2000         //180 度时PWM占空比
 
 /* 电机PWM输出基准值,此状态为小车以一个合适的速度前进 */
 //从车尾看去这个是右轮
-#define PWMBASE_LEFT 5500
+#define PWMBASE_LEFT 5000
 //从车尾看去这个是左轮
-#define PWMBASH_RIGHT 1700
+#define PWMBASH_RIGHT 4800
 
 void servo_set_dutyclcle(uint16_t CCR_value);
 void servo_setangle(uint16_t angle);

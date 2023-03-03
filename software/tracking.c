@@ -2,6 +2,7 @@
 #include "usart.h"
 #include "FunctionList.h"
 #include "motor.h"
+#include "SysTick.h"
 
 #define TRACKER1_PERICMD RCC_APB2PeriphClockCmd
 #define TRACKER1_PERIPH RCC_APB2Periph_GPIOB
@@ -309,9 +310,10 @@ void tracker_sendinfo(void)
         Usart_SendString(DEBUG_USARTx, (TRACKER4_STATUS ? "1 " : "0 "));
         Usart_SendString(DEBUG_USARTx, (TRACKER5_STATUS ? "1 " : "0 "));
         /* 取得累计值 */
+        Usart_SendHalfWord(DEBUG_USARTx, 0x0d0a);
         // printf("total: %d \r\n", ptracker_status->tracker_sum_signed);
         /* 更新状态 */
-        tracking_resume();
+        // tracking_resume();
     }
 }
 
@@ -338,22 +340,21 @@ int32_t caclu_pid(void)
  */
 void stateswitcher(void)
 {
-    static uint8_t status_list[STATE_NUM] =
-        {
-            STATUS_MEMBER
-        };
+    static uint8_t status_list[STATE_NUM] = STATUS_MEMBER;
     for (int i = 0; i < STATE_NUM; i++)
     {
         FunList_Call(status_list[i]);
     }
     stop();
+    while (1)
+        ;
 }
 
 /* 直线循迹 */
 void tracking_straight(void)
 {
     /* TODO:找到舵机角度和pwm占空比关系 */
-    //servo_setangle(S_STRAIGHTWARD);
+    // servo_setangle(S_STRAIGHTWARD);
     for (;;)
     {
         if (ptracker_status->update == status_resloved)
@@ -361,34 +362,47 @@ void tracking_straight(void)
             // STRAIGHT_LOG("STRAIGHTING\r\n");
             continue;
         }
+        /* LOG 一下光电数据 */
+        // tracker_sendinfo();
         /* 退出循环所需满足的条件 TODO:有时候场地脏污使得错误识别提前退出,需要比较苛刻的约束,以后具体调试 */
-        if (TRACKER1_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
+        if ((TRACKER1_STATUS == t_color_black) || (TRACKER5_STATUS == t_color_black))
         {
+            // DEBUG LOG
+            // tracker_sendinfo();
+            // stop();
+            // while(1);
+
             /* 并且要满足 中间左右与同侧边灯同色 减少误判*/
-            if(TRACKER3_STATUS == t_color_black && (TRACKER2_STATUS == TRACKER1_STATUS || TRACKER4_STATUS == TRACKER5_STATUS))
-            /* LOG 一下退出时的光电数据 */
-            tracker_sendinfo();
-            tracking_resume();
-            STRAIGHT_LOG("STRAITHTEXIT\r\n");
-            break;
+            // if(TRACKER3_STATUS == t_color_black && TRACKER2_STATUS == TRACKER1_STATUS && TRACKER4_STATUS == TRACKER5_STATUS)
+            /* 根据实际数据修改的条件 OK */
+            if ((TRACKER2_STATUS == t_color_white) && (TRACKER3_STATUS == t_color_white) && (TRACKER4_STATUS == t_color_white))
+            {
+                STRAIGHT_LOG("STRAITHTEXIT\r\n");
+                tracking_resume();
+                break;
+            }
         }
         // STRAIGHT_LOG("UPDATED\r\n");
         if (TRACKER4_STATUS == t_color_black)
         {
             /* 偏左 向右修正*/
-            //servo_setangle(S_RIGHTWARD);
+            // servo_setangle(S_RIGHTWARD);
             motor_setforward_left(PWMBASE_LEFT + RIGHTWARD_ADD);
             motor_setforward_right(PWMBASH_RIGHT);
+            tracker_sendinfo();
             STRAIGHT_LOG("RIGHTWARD\r\n");
         }
         else if (TRACKER2_STATUS == t_color_black)
         {
             /* 偏右 向左修正*/
-            //servo_setangle(S_LEFTWARD);
+            // servo_setangle(S_LEFTWARD);
             motor_setforward_left(PWMBASE_LEFT);
             motor_setforward_right(PWMBASH_RIGHT + LEFTWARD_ADD);
+            tracker_sendinfo();
             STRAIGHT_LOG("LEFTWARD\r\n");
         }
+        gostraight(0);
+        // servo_set_dutyclcle(2400);
         tracking_resume();
     }
 }
@@ -396,10 +410,14 @@ void tracking_straight(void)
 /* 巡线90度左转 */
 void tracking_left(void)
 {
+    TRACKLEFT90_LOG("LEFT90IN");
     /* 向左大转弯 右轮加速左轮减速 */
     // servo_setangle(S_LEFT90);
-    motor_setforward_left(PWMBASE_LEFT - LEFTTURN_SUB);
     motor_setforward_right(PWMBASH_RIGHT + LEFTTURN_ADD);
+    motor_setbrake_left();
+    motor_setbackward_left(PWMBASE_LEFT + LEFTTURN_SUB);
+    // Delay_ms(50);
+    motor_setbrake_left();
     for (;;)
     {
         if (ptracker_status->update == status_resloved)
@@ -407,24 +425,31 @@ void tracking_left(void)
             // TRACKLEFT90_LOG("LEFT90TURNING\r\n");
             continue;
         }
+        tracker_sendinfo();
         /* 中心和靠外圈的光电均为黑色退出转弯模式 */
-        if(TRACKER3_STATUS == t_color_black && TRACKER2_STATUS == t_color_black)
+        // if (TRACKER3_STATUS == t_color_black && TRACKER2_STATUS == t_color_black)
+        if (TRACKER2_STATUS == t_color_black)
         {
             tracker_sendinfo();
             tracking_resume();
             TRACKLEFT90_LOG("LEFT90EXIT");
             break;
         }
+        tracking_resume();
     }
 }
 
 /* 巡线90度右转 */
 void tracking_right(void)
 {
+    TRACKRIGHT90_LOG("RIGHT90IN");
     /* 向右大转弯 左轮加速右轮减速 */
     // servo_setangle(S_RIGHT90);
-    motor_setforward_left(PWMBASE_LEFT + LEFTTURN_SUB);
-    motor_setforward_right(PWMBASH_RIGHT + LEFTTURN_ADD);
+    motor_setforward_left(PWMBASE_LEFT + RIGHTTURN_ADD);
+    motor_setbrake_right();
+    motor_setbackward_right(PWMBASH_RIGHT + RIGHTTURN_SUB);
+    // Delay_ms(50);
+    motor_setbrake_right();
     for (;;)
     {
         if (ptracker_status->update == status_resloved)
@@ -433,12 +458,13 @@ void tracking_right(void)
             continue;
         }
         /* 中心和靠外圈的光电均为黑色退出转弯模式 */
-        if(TRACKER3_STATUS == t_color_black && TRACKER1_STATUS == t_color_black)
+        if (TRACKER4_STATUS == t_color_black)
         {
             tracker_sendinfo();
             tracking_resume();
             TRACKRIGHT90_LOG("RIGHT90EXIT");
             break;
         }
+        tracking_resume();
     }
 }

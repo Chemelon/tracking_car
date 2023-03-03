@@ -19,11 +19,13 @@
 #define POLLING_CNT 10
 
 /* 状态列表的状态数 */
-#define STATE_NUM 4
+#define STATE_NUM 6
 
 #define STATUS_MEMBER          \
     {                          \
         0x00,     /* 直行 */ \
+            0x01, /* 左转 */ \
+            0x00, /* 直行 */ \
             0x01, /* 左转 */ \
             0x00, /* 直行 */ \
             0x01, /* 左转 */ \
@@ -44,33 +46,37 @@
 /* 直线时舵机角度 */
 #define S_STRAIGHTWARD 0
 /* 向右修正时舵机角度 */
-#define S_RIGHTWARD 0
+#define S_RIGHTWARD 155
 /* 向左修正时舵机角度 */
-#define S_LEFTWARD 0
-/* 向右修正时差速PWM值 即左比右快的值 */
-#define RIGHTWARD_ADD 2500
+#define S_LEFTWARD 25 
+/* 向右修正时差速PWM值 即左比右快的值 CCMR 最大值10000*/
+#define RIGHTWARD_ADD 3000
 /* 向左修正时差速PWM值 即右比左快的值 */
-#define LEFTWARD_ADD 1500
+#define LEFTWARD_ADD 2000
+
+
 
 #if DEBUG_TRACKLEFT90_LOG
 #define TRACKLEFT90_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
 #else
 #define TRACKLEFT90_LOG(msg)
 #endif
-/* 向左转直角弯时差速PWM值 即右比左快的值 */
-#define LEFTTURN_ADD 1500
+/* 向左转直角弯时差速PWM值 即右比左快的值 CCMR 最大值10000*/
+#define LEFTTURN_ADD 1000
 /* 向左转直角弯时差速PWM值 即左比右慢的值 */
-#define LEFTTURN_SUB 1500
+#define LEFTTURN_SUB 0
+
+
 
 #if DEBUG_TRACKRIGHT90_LOG
 #define TRACKRIGHT90_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
 #else
 #define TRACKRIGHT90_LOG(msg)
 #endif
-/* 向左转直角弯时差速PWM值 即右比左快的值 */
-#define LEFTTURN_ADD 1500
-/* 向左转直角弯时差速PWM值 即左比右慢的值 */
-#define LEFTTURN_SUB (-1500)
+/* 向右转直角弯时差速PWM值 即左比右快的值 */
+#define RIGHTTURN_ADD 1000
+/* 向右转直角弯时差速PWM值 即右比左慢的值 */
+#define RIGHTTURN_SUB 2500
 
 /* 比例 */
 #define KP 1
@@ -114,6 +120,7 @@ void NVIC_tracker_init(void);
 void GPIO_tracker_init_polling(void);
 void TIM3_tracker_init_polling(void);
 void NVIC_tracker_init_polling(void);
+void tracking_resume(void);
 void tracker_sendinfo(void);
 int32_t caclu_pid(void);
 void stateswitcher(void);
