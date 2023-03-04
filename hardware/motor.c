@@ -126,8 +126,8 @@ void motor_setforward_right(uint16_t pwm_ccr_val)
 void goback(uint16_t speed)
 {
     /* 新车和原车正好相反 */
-    motor_setforward_left(PWMBASE_LEFT + speed);
-    motor_setforward_right(PWMBASH_RIGHT + speed);
+    motor_setforward_left(STRAIGHTBASE_LEFT + speed);
+    motor_setforward_right(STRAIGHTBASE_RIGHT + speed);
 }
 
 /**
@@ -137,8 +137,8 @@ void goback(uint16_t speed)
  */
 void gostraight(uint16_t speed)
 {
-    motor_setforward_left(PWMBASE_LEFT + speed);
-    motor_setforward_right(PWMBASH_RIGHT + speed);
+    motor_setforward_left(STRAIGHTBASE_LEFT + speed);
+    motor_setforward_right(STRAIGHTBASE_RIGHT + speed);
 }
 
 /**

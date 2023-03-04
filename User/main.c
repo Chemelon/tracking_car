@@ -25,16 +25,13 @@ int main(void)
 #endif
     Usart_SendString(DEBUG_USARTx, "system inited\r\n");
 
-
-
-    //servo_set_dutyclcle(2400);
-//    gostraight(0);
-//    while(1);
+    // servo_set_dutyclcle(2400);
+    //    gostraight(0);
+    //    while(1);
     stop();
-    
-    
-    //tracking_straight();
-    //stop();
+
+    // tracking_straight();
+    // stop();
 
 #if 0
     for(;;)
@@ -45,31 +42,29 @@ int main(void)
     }
 #endif
 
-    stateswitcher();  
-    
-    
-    for(;;)
+    stateswitcher();
+
+    for (;;)
     {
         servo_setangle(45);
         Delay_ms(1000);
         servo_setangle(135);
         Delay_ms(1000);
-    
     }
 
     /* TODO: 舵机的角度对应关系还没有调好 */
-//    for (int i = 0;;i+=1)
-//    {
-//        
-//        Delay_ms(500);
-//        servo_setangle(i);
-//        printf("%d\r\n",i);
-//        if (i > 180)
-//        {
-//            i = 0;
-//        }
-//        // Usart_SendString(DEBUG_USARTx, "running\r\n");
-//    }
+    //    for (int i = 0;;i+=1)
+    //    {
+    //
+    //        Delay_ms(500);
+    //        servo_setangle(i);
+    //        printf("%d\r\n",i);
+    //        if (i > 180)
+    //        {
+    //            i = 0;
+    //        }
+    //        // Usart_SendString(DEBUG_USARTx, "running\r\n");
+    //    }
 }
 
 void DEBUG_USART_IRQHandler(void)

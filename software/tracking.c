@@ -369,11 +369,6 @@ void tracking_straight(void)
         {
             // DEBUG LOG
             // tracker_sendinfo();
-            // stop();
-            // while(1);
-
-            /* 并且要满足 中间左右与同侧边灯同色 减少误判*/
-            // if(TRACKER3_STATUS == t_color_black && TRACKER2_STATUS == TRACKER1_STATUS && TRACKER4_STATUS == TRACKER5_STATUS)
             /* 根据实际数据修改的条件 OK */
             if ((TRACKER2_STATUS == t_color_white) && (TRACKER3_STATUS == t_color_white) && (TRACKER4_STATUS == t_color_white))
             {
@@ -387,8 +382,8 @@ void tracking_straight(void)
         {
             /* 偏左 向右修正*/
             // servo_setangle(S_RIGHTWARD);
-            motor_setforward_left(PWMBASE_LEFT + RIGHTWARD_ADD);
-            motor_setforward_right(PWMBASH_RIGHT);
+            motor_setforward_left(STRAIGHTBASE_LEFT + RIGHTWARD_ADD);
+            motor_setforward_right(STRAIGHTBASE_RIGHT);
             tracker_sendinfo();
             STRAIGHT_LOG("RIGHTWARD\r\n");
         }
@@ -396,8 +391,8 @@ void tracking_straight(void)
         {
             /* 偏右 向左修正*/
             // servo_setangle(S_LEFTWARD);
-            motor_setforward_left(PWMBASE_LEFT);
-            motor_setforward_right(PWMBASH_RIGHT + LEFTWARD_ADD);
+            motor_setforward_left(STRAIGHTBASE_LEFT);
+            motor_setforward_right(STRAIGHTBASE_RIGHT + LEFTWARD_ADD);
             tracker_sendinfo();
             STRAIGHT_LOG("LEFTWARD\r\n");
         }
@@ -413,9 +408,9 @@ void tracking_left(void)
     TRACKLEFT90_LOG("LEFT90IN");
     /* 向左大转弯 右轮加速左轮减速 */
     // servo_setangle(S_LEFT90);
-    motor_setforward_right(PWMBASH_RIGHT + LEFTTURN_ADD);
+    motor_setforward_right(RIGHTTURNBASE_RIGHT + LEFTTURN_ADD);
     motor_setbrake_left();
-    motor_setbackward_left(PWMBASE_LEFT + LEFTTURN_SUB);
+    motor_setbackward_left(LEFTTURNBASE_LEFT + LEFTTURN_SUB);
     // Delay_ms(50);
     motor_setbrake_left();
     for (;;)
@@ -445,9 +440,9 @@ void tracking_right(void)
     TRACKRIGHT90_LOG("RIGHT90IN");
     /* 向右大转弯 左轮加速右轮减速 */
     // servo_setangle(S_RIGHT90);
-    motor_setforward_left(PWMBASE_LEFT + RIGHTTURN_ADD);
+    motor_setforward_left(RIGHTTURNBASE_LEFT + RIGHTTURN_ADD);
     motor_setbrake_right();
-    motor_setbackward_right(PWMBASH_RIGHT + RIGHTTURN_SUB);
+    motor_setbackward_right(RIGHTTURNBASE_RIGHT + RIGHTTURN_SUB);
     // Delay_ms(50);
     motor_setbrake_right();
     for (;;)
@@ -467,4 +462,17 @@ void tracking_right(void)
         }
         tracking_resume();
     }
+}
+
+
+/* 进环 */
+void circle_in(void)
+{
+
+}
+
+/* 出环 */
+void circle_out(void)
+{
+    
 }
