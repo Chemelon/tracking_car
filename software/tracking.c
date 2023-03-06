@@ -7,34 +7,41 @@
 #define TRACKER1_PERICMD RCC_APB2PeriphClockCmd
 #define TRACKER1_PERIPH RCC_APB2Periph_GPIOB
 #define TRACKER1_PORT GPIOB
-#define TRACKER1_PIN GPIO_Pin_4
+#define TRACKER1_PIN GPIO_Pin_3
 
 #define TRACKER2_PERICMD RCC_APB2PeriphClockCmd
 #define TRACKER2_PERIPH RCC_APB2Periph_GPIOB
 #define TRACKER2_PORT GPIOB
-#define TRACKER2_PIN GPIO_Pin_5
+#define TRACKER2_PIN GPIO_Pin_4
 
 #define TRACKER3_PERICMD RCC_APB2PeriphClockCmd
 #define TRACKER3_PERIPH RCC_APB2Periph_GPIOB
 #define TRACKER3_PORT GPIOB
-#define TRACKER3_PIN GPIO_Pin_6
+#define TRACKER3_PIN GPIO_Pin_5
 
 #define TRACKER4_PERICMD RCC_APB2PeriphClockCmd
 #define TRACKER4_PERIPH RCC_APB2Periph_GPIOB
 #define TRACKER4_PORT GPIOB
-#define TRACKER4_PIN GPIO_Pin_7
+#define TRACKER4_PIN GPIO_Pin_8
 
 #define TRACKER5_PERICMD RCC_APB2PeriphClockCmd
 #define TRACKER5_PERIPH RCC_APB2Periph_GPIOB
 #define TRACKER5_PORT GPIOB
-#define TRACKER5_PIN GPIO_Pin_8
+#define TRACKER5_PIN GPIO_Pin_9
 
 /* 位带操作 */
+#define GPIOB_IDR_BIT3 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 3 * 4))
 #define GPIOB_IDR_BIT4 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 4 * 4))
 #define GPIOB_IDR_BIT5 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 5 * 4))
-#define GPIOB_IDR_BIT6 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 6 * 4))
-#define GPIOB_IDR_BIT7 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 7 * 4))
 #define GPIOB_IDR_BIT8 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 8 * 4))
+#define GPIOB_IDR_BIT9 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 9 * 4))
+
+#define TRACKER_PIN1 GPIOB_IDR_BIT3
+#define TRACKER_PIN2 GPIOB_IDR_BIT4
+#define TRACKER_PIN3 GPIOB_IDR_BIT5
+#define TRACKER_PIN4 GPIOB_IDR_BIT8
+#define TRACKER_PIN5 GPIOB_IDR_BIT9
+
 
 enum tracker_color
 {
@@ -60,11 +67,11 @@ void EXTI4_IRQHandler(void)
     EXTI->PR = (EXTI->PR & EXTI_Line4) ? EXTI_Line4 : 0;
     /* 将光电管的状态保存至内存 */
     tracker_status.update = status_updated;
-    tracker_status.tarcker1 = GPIOB_IDR_BIT5;
-    tracker_status.tarcker2 = GPIOB_IDR_BIT7;
-    tracker_status.tarcker3 = GPIOB_IDR_BIT6;
-    tracker_status.tarcker4 = GPIOB_IDR_BIT4;
-    tracker_status.tarcker5 = GPIOB_IDR_BIT8;
+    tracker_status.tarcker1 = TRACKER_PIN1;
+    tracker_status.tarcker2 = TRACKER_PIN2;
+    tracker_status.tarcker3 = TRACKER_PIN3;
+    tracker_status.tarcker4 = TRACKER_PIN4;
+    tracker_status.tarcker5 = TRACKER_PIN5;
     // Usart_SendString(DEBUG_USARTx, "ext4\r\n");
 }
 
@@ -195,13 +202,13 @@ void TIM3_IRQHandler(void)
     {
         /* 将光电管的状态保存至内存 */
         // tracker_status.update = status_updated;
-        tracker_status.tarcker1 = GPIOB_IDR_BIT5;
-        tracker_status.tarcker2 = GPIOB_IDR_BIT7; // 1
-        tracker_status.tarcker3 = GPIOB_IDR_BIT6; // 1
-        tracker_status.tarcker4 = GPIOB_IDR_BIT4; // 1
-        tracker_status.tarcker5 = GPIOB_IDR_BIT8;
+        tracker_status.tarcker1 = TRACKER_PIN1;
+        tracker_status.tarcker2 = TRACKER_PIN2; // 1
+        tracker_status.tarcker3 = TRACKER_PIN3; // 1
+        tracker_status.tarcker4 = TRACKER_PIN4; // 1
+        tracker_status.tarcker5 = TRACKER_PIN5;
         /* 将光电管的状态保存至内存 */
-        tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
+        //tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
         tracker_status.tracker_cnt_it++;
     }
 }
@@ -216,7 +223,8 @@ void GPIO_tracker_init_polling(void)
     TRACKER4_PERICMD(TRACKER4_PERIPH, ENABLE);
     TRACKER5_PERICMD(TRACKER5_PERIPH, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable , ENABLE);
+    
     gpio_init_struct.GPIO_Mode = GPIO_Mode_IPU;
     gpio_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
     gpio_init_struct.GPIO_Pin = TRACKER1_PIN;
@@ -362,12 +370,10 @@ void tracking_straight(void)
             // STRAIGHT_LOG("STRAIGHTING\r\n");
             continue;
         }
-        /* LOG 一下光电数据 */
         // tracker_sendinfo();
         /* 退出循环所需满足的条件 TODO:有时候场地脏污使得错误识别提前退出,需要比较苛刻的约束,以后具体调试 */
         if ((TRACKER1_STATUS == t_color_black) || (TRACKER5_STATUS == t_color_black))
         {
-            // DEBUG LOG
             // tracker_sendinfo();
             /* 根据实际数据修改的条件 OK */
             if ((TRACKER2_STATUS == t_color_white) && (TRACKER3_STATUS == t_color_white) && (TRACKER4_STATUS == t_color_white))

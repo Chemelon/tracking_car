@@ -2,10 +2,10 @@
 #define __MOTOR_H
 #include "stm32f10x.h"
 
-#define M_PWM_LEFT_P (TIM2->CCR1)
-#define M_PWM_LEFT_N (TIM2->CCR2)
-#define M_PWM_RIGHT_P (TIM2->CCR3)
-#define M_PWM_RIGHT_N (TIM2->CCR4)
+#define M_PWM_RIGHT_N (TIM2->CCR1)
+#define M_PWM_RIGHT_P (TIM2->CCR2)
+#define M_PWM_LEFT_P (TIM2->CCR3)
+#define M_PWM_LEFT_N (TIM2->CCR4)
 
 /* 设置TIM1 CCR4 改变占空比从而控制舵机 */
 #define S_PWM_CCR (TIM1->CCR4)
@@ -14,11 +14,11 @@
 #define S_PWM_CCR_0 500           // 0 度时PWM占空比
 #define S_PWM_CCR_180 2000         //180 度时PWM占空比
 
-/* 电机PWM输出基准值,此状态为小车以一个合适的速度前进 */
+/* 电机PWM输出基准值,此状态为小车以一个合适的速度前进 0~2000*/
 //从车尾看去这个是右轮
-#define STRAIGHTBASE_LEFT 5000
+#define STRAIGHTBASE_LEFT 1000
 //从车尾看去这个是左轮
-#define STRAIGHTBASE_RIGHT 4800
+#define STRAIGHTBASE_RIGHT 1000
 
 void servo_set_dutyclcle(uint16_t CCR_value);
 void servo_setangle(uint16_t angle);

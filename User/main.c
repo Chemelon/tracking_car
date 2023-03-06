@@ -6,6 +6,12 @@
 #include "usart.h"
 #include "motor.h"
 
+#define GPIOB_IDR_BIT3 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 3 * 4))
+#define GPIOB_IDR_BIT4 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 4 * 4))
+#define GPIOB_IDR_BIT5 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 5 * 4))
+#define GPIOB_IDR_BIT8 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 8 * 4))
+#define GPIOB_IDR_BIT9 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 9 * 4))
+
 int main(void)
 {
     /* 嵌套向量中断控制器组选择 */
@@ -24,21 +30,15 @@ int main(void)
     NVIC_tracker_init();
 #endif
     Usart_SendString(DEBUG_USARTx, "system inited\r\n");
-
-    // servo_set_dutyclcle(2400);
-    //    gostraight(0);
-    //    while(1);
     stop();
-
-    // tracking_straight();
-    // stop();
-
-#if 0
+#if 1
     for(;;)
     {
-        tracker_sendinfo();
+        printf("%d %d %d %d %d",GPIOB_IDR_BIT3,GPIOB_IDR_BIT4,GPIOB_IDR_BIT5,GPIOB_IDR_BIT8,GPIOB_IDR_BIT9);
+        printf("\r\n");
+        //tracker_sendinfo();
         tracking_resume();
-        Delay_ms(50);
+        Delay_ms(200);
     }
 #endif
 
