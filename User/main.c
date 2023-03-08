@@ -5,6 +5,7 @@
 #include "SysTick.h"
 #include "usart.h"
 #include "motor.h"
+#include "encoder.h"
 
 #define GPIOB_IDR_BIT3 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 3 * 4))
 #define GPIOB_IDR_BIT4 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 4 * 4))
@@ -30,11 +31,15 @@ int main(void)
     GPIO_tracker_init();
     NVIC_tracker_init();
 #endif
+    encoder_init();
+
     Usart_SendString(DEBUG_USARTx, "system inited\r\n");
     stop();
+    //gostraight(0);
 #if 1
     for(;;)
     {
+        printf("%d %d \r\n",TIM3->CNT,TIM4->CNT);
         tracker_sendinfo();
         tracking_resume();
         Delay_ms(200);

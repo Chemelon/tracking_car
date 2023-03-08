@@ -330,7 +330,7 @@ void NVIC_tracker_init_polling(void)
     //NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
     NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_IRQn;
     /* 抢断优先级*/
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;
     /* 子优先级 */
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     /* 使能中断 */
@@ -350,9 +350,9 @@ void tracking_resume(void)
     /* 更新状态 */
     ptracker_status->update = status_resloved;
     /* 复位CNT */
-    TIM3->CNT = 0;
+    TIM1->CNT = 0;
     /* 使能定时器 */
-    TIM3->CR1 |= TIM_CR1_CEN;
+    TIM1->CR1 |= TIM_CR1_CEN;
 #else
     ptracker_status->update = status_resloved;
 #endif
@@ -377,23 +377,6 @@ void tracker_sendinfo(void)
         /* 更新状态 */
         // tracking_resume();
     }
-}
-
-int32_t caclu_pid(void)
-{
-    /* 上个误差值以及上上个误差值 */
-    static int err_priv1 = 0, err_priv2 = 0;
-    int err_curr;
-    int pid_delta;
-    /* tracker_sum_signed 是一个-10~10 的数 */
-    err_curr = tracker_status.tracker_sum_signed;
-
-    pid_delta = (KP * (err_curr - err_priv1)) + (KI * (err_curr)) + (KD * (err_curr - 2 * err_priv1 + err_priv2));
-
-    err_priv2 = err_priv1;
-    err_priv1 = err_curr;
-
-    return pid_delta;
 }
 
 /**

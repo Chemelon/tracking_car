@@ -616,6 +616,11 @@
               <FileType>1</FileType>
               <FilePath>..\hardware\motor.c</FilePath>
             </File>
+            <File>
+              <FileName>encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\hardware\encoder.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1244,6 +1249,11 @@
               <FileName>motor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\hardware\motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\hardware\encoder.c</FilePath>
             </File>
           </Files>
         </Group>

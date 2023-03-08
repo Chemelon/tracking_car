@@ -123,7 +123,7 @@ extern volatile tracker_type *ptracker_status;
 void GPIO_tracker_init(void);
 void NVIC_tracker_init(void);
 void GPIO_tracker_init_polling(void);
-void TIM3_tracker_init_polling(void);
+void TIM1_tracker_init_polling(void);
 void NVIC_tracker_init_polling(void);
 void tracking_resume(void);
 void tracker_sendinfo(void);
