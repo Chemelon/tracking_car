@@ -20,10 +20,11 @@ int main(void)
     USART_Config();
     GPIO_PWM_init();
     TIM2_PWM_init();
-    TIM1_PWM_init();
+    //TIM1_PWM_init();
 #if TRACKER_POLLING
     GPIO_tracker_init_polling();
-    TIM3_tracker_init_polling();
+    //TIM3_tracker_init_polling();
+    TIM1_tracker_init_polling();
     NVIC_tracker_init_polling();
 #else
     GPIO_tracker_init();
@@ -34,9 +35,7 @@ int main(void)
 #if 1
     for(;;)
     {
-        printf("%d %d %d %d %d",GPIOB_IDR_BIT3,GPIOB_IDR_BIT4,GPIOB_IDR_BIT5,GPIOB_IDR_BIT8,GPIOB_IDR_BIT9);
-        printf("\r\n");
-        //tracker_sendinfo();
+        tracker_sendinfo();
         tracking_resume();
         Delay_ms(200);
     }

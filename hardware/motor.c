@@ -1,4 +1,5 @@
 #include "motor.h"
+#include "pid.h"
 #include "stm32f10x.h"
 #include "pwm.h"
 /* 舵机相关函数 */
@@ -160,3 +161,5 @@ void stop(void)
     motor_setstop_right();
     motor_setstop_left();
 }
+
+

@@ -213,6 +213,35 @@ void TIM3_IRQHandler(void)
     }
 }
 
+/**
+ * @brief 中断频率为1000hz 累计10次的采样总值 即实际控制处理频率约为100hz
+ *
+ */
+void TIM1_UP_IRQHandler(void)
+{
+    TIM1->SR = ~TIM_SR_UIF;
+    if (tracker_status.tracker_cnt_it > POLLING_CNT)
+    {
+        /* 关闭计数器 */
+        TIM1->CR1 &= ~TIM_CR1_CEN;
+        /* 通知更新 */
+        tracker_status.update = status_updated;
+        return;
+    }
+    {
+        /* 将光电管的状态保存至内存 */
+        // tracker_status.update = status_updated;
+        tracker_status.tarcker1 = TRACKER_PIN1;
+        tracker_status.tarcker2 = TRACKER_PIN2; // 1
+        tracker_status.tarcker3 = TRACKER_PIN3; // 1
+        tracker_status.tarcker4 = TRACKER_PIN4; // 1
+        tracker_status.tarcker5 = TRACKER_PIN5;
+        /* 将光电管的状态保存至内存 */
+        //tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
+        tracker_status.tracker_cnt_it++;
+    }
+}
+
 void GPIO_tracker_init_polling(void)
 {
     GPIO_InitTypeDef gpio_init_struct;
@@ -269,12 +298,37 @@ void TIM3_tracker_init_polling(void)
     TIM3->CR1 |= TIM_CR1_CEN;
 }
 
+/**
+ * @brief 初始化定时器1 周期性扫描光电状态
+ *
+ */
+void TIM1_tracker_init_polling(void)
+{
+#define TIM1_TARGET_FREQ POLLING_FREQ // 目标频率
+#define FCK_FREQ (SYS_CLOCK_FREQ / 1) // 定时器有PLL补偿所以和APB1频率一样
+#define TIM1_CKCNT_FREQ 100000             // 100 000 hz
+#define TIM1_ARR (TIM1_CKCNT_FREQ / TIM1_TARGET_FREQ - 1)
+    /* 开启外设时钟 */
+    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
+    /*100000 Hz*/
+    TIM1->PSC = (FCK_FREQ / TIM1_CKCNT_FREQ - 1);
+    /* 清空计数器 */
+    TIM1->CNT = 0;
+    /* 0~99 */
+    TIM1->ARR = TIM1_ARR;
+    /* 开启更新中断 */
+    TIM1->DIER |= TIM_DIER_UIE;
+    /* 开启TIM1时钟 */
+    TIM1->CR1 |= TIM_CR1_CEN;
+}
+
 void NVIC_tracker_init_polling(void)
 {
     NVIC_InitTypeDef NVIC_InitStructure;
 
     /* 配置TIM3为中断源 */
-    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+    //NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_IRQn;
     /* 抢断优先级*/
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;
     /* 子优先级 */

@@ -14,7 +14,7 @@
  */
 #define TRACKER_POLLING 1
 /* 定时器每秒中断次数,即采样频率 2~100000 */
-#define POLLING_FREQ 10000
+#define POLLING_FREQ 1000
 /* 采样次数 */
 #define POLLING_CNT 10
 
