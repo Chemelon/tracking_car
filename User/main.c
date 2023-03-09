@@ -36,10 +36,10 @@ int main(void)
     Usart_SendString(DEBUG_USARTx, "system inited\r\n");
     stop();
     //gostraight(0);
-#if 1
+#if 0
     for(;;)
     {
-        printf("%d %d \r\n",TIM3->CNT,TIM4->CNT);
+        //printf("%d %d \r\n",TIM3->CNT,TIM4->CNT);
         tracker_sendinfo();
         tracking_resume();
         Delay_ms(200);

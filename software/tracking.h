@@ -2,87 +2,6 @@
 #define __TRACKING_H
 #include "stm32f10x.h"
 
-#define TRACKER1_STATUS (ptracker_status->tarcker1)
-#define TRACKER2_STATUS (ptracker_status->tarcker2)
-#define TRACKER3_STATUS (ptracker_status->tarcker3)
-#define TRACKER4_STATUS (ptracker_status->tarcker4)
-#define TRACKER5_STATUS (ptracker_status->tarcker5)
-
-/**
- * @brief 选择获取光电数据的方式 1 轮询 0 外部中断
- *
- */
-#define TRACKER_POLLING 1
-/* 定时器每秒中断次数,即采样频率 2~100000 */
-#define POLLING_FREQ 1000
-/* 采样次数 */
-#define POLLING_CNT 10
-
-/* 状态列表的状态数 */
-#define STATE_NUM 6
-
-#define STATUS_MEMBER          \
-    {                          \
-        0x00,     /* 直行 */ \
-            0x01, /* 左转 */ \
-            0x00, /* 直行 */ \
-            0x01, /* 左转 */ \
-            0x00, /* 直行 */ \
-            0x01, /* 左转 */ \
-    }
-
-/* 直线循迹log开关 */
-#define DEBUG_STRAIGHT 1
-/* 寻线90度右转log开关 */
-#define DEBUG_TRACKRIGHT90_LOG 1
-/* 寻线90度左转log开关 */
-#define DEBUG_TRACKLEFT90_LOG 1
-
-#if DEBUG_STRAIGHT
-#define STRAIGHT_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
-#else
-#define STRAIGHT_LOG(msg)
-#endif
-/* 直线时舵机角度 */
-#define S_STRAIGHTWARD 0
-/* 向右修正时舵机角度 */
-#define S_RIGHTWARD 155
-/* 向左修正时舵机角度 */
-#define S_LEFTWARD 25 
-/* 向右修正时差速PWM值 即左比右快的值 CCMR 最大值2000*/
-#define RIGHTWARD_ADD 300
-/* 向左修正时差速PWM值 即右比左快的值 */
-#define LEFTWARD_ADD 200
-
-
-
-#if DEBUG_TRACKLEFT90_LOG
-#define TRACKLEFT90_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
-#else
-#define TRACKLEFT90_LOG(msg)
-#endif
-/* 向左转直角弯时差速PWM值 即右比左快的值 CCMR 最大值2000*/
-#define LEFTTURN_ADD 100
-/* 向左转直角弯时差速PWM值 即左比右慢的值 */
-#define LEFTTURN_SUB 0
-#define LEFTTURNBASE_LEFT STRAIGHTBASE_LEFT
-#define RIGHTTURNBASE_RIGHT STRAIGHTBASE_RIGHT
-
-
-
-#if DEBUG_TRACKRIGHT90_LOG
-#define TRACKRIGHT90_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
-#else
-#define TRACKRIGHT90_LOG(msg)
-#endif
-/* 向右转直角弯时差速PWM值 即左比右快的值 */
-#define RIGHTTURN_ADD 1000
-/* 向右转直角弯时差速PWM值 即右比左慢的值 */
-#define RIGHTTURN_SUB 2500
-#define RIGHTTURNBASE_LEFT STRAIGHTBASE_LEFT
-#define RIGHTTURNBASE_RIGHT STRAIGHTBASE_RIGHT
-
-
 /* 比例 */
 #define KP 1
 /* 积分 */
@@ -134,4 +53,93 @@ void tracking_straight(void);
 void tracking_left(void);
 void tracking_right(void);
 
+#define TRACKER1_STATUS (ptracker_status->tarcker1)
+#define TRACKER2_STATUS (ptracker_status->tarcker2)
+#define TRACKER3_STATUS (ptracker_status->tarcker3)
+#define TRACKER4_STATUS (ptracker_status->tarcker4)
+#define TRACKER5_STATUS (ptracker_status->tarcker5)
+
+/**
+ * @brief 选择获取光电数据的方式 1 轮询 0 外部中断
+ *
+ */
+#define TRACKER_POLLING 1
+/* 定时器每秒中断次数,即采样频率 2~100000 */
+#define POLLING_FREQ 1000
+/* 采样次数 */
+#define POLLING_CNT 10
+
+/* 状态列表的状态数 */
+#define STATE_NUM 10
+
+#define STATUS_MEMBER          \
+    {                          \
+        0x00,     /* 直行 */ \
+            0x01, /* 左转 */ \
+            0x00, /* 直行 */ \
+            0x01, /* 左转 */ \
+            0x00, /* 直行 */ \
+            0x01, /* 左转 */ \
+            0x00, /* 直行 */ \
+            0x01, /* 左转 */ \
+            0x00, /* 直行 */ \
+            0x02, /* 右转 */ \
+    }
+
+/* 直线循迹log开关 */
+#define DEBUG_STRAIGHT 0
+/* 寻线90度右转log开关 */
+#define DEBUG_TRACKRIGHT90 1
+/* 寻线90度左转log开关 */
+#define DEBUG_TRACKLEFT90 0
+
+#if DEBUG_STRAIGHT
+#define STRAIGHT_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
+#else
+#define STRAIGHT_LOG(msg)
+#endif
+/* 直线时舵机角度 */
+#define S_STRAIGHTWARD 0
+/* 向右修正时舵机角度 */
+#define S_RIGHTWARD 155
+/* 向左修正时舵机角度 */
+#define S_LEFTWARD 25
+
+/* 向右修正时差速PWM值 即左比右快的值 CCMR 最大值36000*/
+#define RIGHTWARD_ADD 8000
+/* 向左修正时差速PWM值 即右比左快的值 */
+#define LEFTWARD_ADD 8000
+
+#if DEBUG_TRACKLEFT90
+#define TRACKLEFT90_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
+#else
+#define TRACKLEFT90_LOG(msg)
+#endif
+/* 向左转直角弯时差速PWM值 即右比左快的值 CCMR 最大值2000*/
+#define LEFTTURN_ADD 8000
+/* 向左转直角弯时差速PWM值 即左比右慢的值 */
+#define LEFTTURN_SUB 10000
+#define LEFTTURNBASE_LEFT STRAIGHTBASE_LEFT
+#define RIGHTTURNBASE_RIGHT STRAIGHTBASE_RIGHT
+
+#if DEBUG_TRACKRIGHT90
+#define TRACKRIGHT90_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
+#else
+#define TRACKRIGHT90_LOG(msg)
+#endif
+/* 向右转直角弯时差速PWM值 即左比右快的值 */
+#define RIGHTTURN_ADD 8000
+/* 向右转直角弯时差速PWM值 即右比左慢的值 */
+#define RIGHTTURN_SUB 10000
+#define RIGHTTURNBASE_LEFT STRAIGHTBASE_LEFT
+#define RIGHTTURNBASE_RIGHT STRAIGHTBASE_RIGHT
+
+#define DEBUG_ACTIONSTOP    \
+    do                      \
+    {                       \
+        brake();             \
+        tracker_sendinfo(); \
+        while (1)           \
+            ;               \
+    } while (0)
 #endif

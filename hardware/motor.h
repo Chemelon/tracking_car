@@ -30,6 +30,7 @@ void motor_setbrake_left(void);
 void motor_setbrake_right(void);
 void gostraight(uint16_t speed);
 void goback(uint16_t speed);
+void brake(void);
 void stop(void);
 
 #endif

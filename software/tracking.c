@@ -42,7 +42,6 @@
 #define TRACKER_PIN4 GPIOB_IDR_BIT8
 #define TRACKER_PIN5 GPIOB_IDR_BIT9
 
-
 enum tracker_color
 {
     t_color_white,
@@ -208,7 +207,7 @@ void TIM3_IRQHandler(void)
         tracker_status.tarcker4 = TRACKER_PIN4; // 1
         tracker_status.tarcker5 = TRACKER_PIN5;
         /* 将光电管的状态保存至内存 */
-        //tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
+        // tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
         tracker_status.tracker_cnt_it++;
     }
 }
@@ -237,7 +236,7 @@ void TIM1_UP_IRQHandler(void)
         tracker_status.tarcker4 = TRACKER_PIN4; // 1
         tracker_status.tarcker5 = TRACKER_PIN5;
         /* 将光电管的状态保存至内存 */
-        //tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
+        // tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
         tracker_status.tracker_cnt_it++;
     }
 }
@@ -252,8 +251,8 @@ void GPIO_tracker_init_polling(void)
     TRACKER4_PERICMD(TRACKER4_PERIPH, ENABLE);
     TRACKER5_PERICMD(TRACKER5_PERIPH, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-    GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable , ENABLE);
-    
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
+
     gpio_init_struct.GPIO_Mode = GPIO_Mode_IPU;
     gpio_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
     gpio_init_struct.GPIO_Pin = TRACKER1_PIN;
@@ -306,7 +305,7 @@ void TIM1_tracker_init_polling(void)
 {
 #define TIM1_TARGET_FREQ POLLING_FREQ // 目标频率
 #define FCK_FREQ (SYS_CLOCK_FREQ / 1) // 定时器有PLL补偿所以和APB1频率一样
-#define TIM1_CKCNT_FREQ 100000             // 100 000 hz
+#define TIM1_CKCNT_FREQ 100000        // 100 000 hz
 #define TIM1_ARR (TIM1_CKCNT_FREQ / TIM1_TARGET_FREQ - 1)
     /* 开启外设时钟 */
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
@@ -327,7 +326,7 @@ void NVIC_tracker_init_polling(void)
     NVIC_InitTypeDef NVIC_InitStructure;
 
     /* 配置TIM3为中断源 */
-    //NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+    // NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
     NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_IRQn;
     /* 抢断优先级*/
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;
@@ -411,12 +410,15 @@ void tracking_straight(void)
         /* 退出循环所需满足的条件 TODO:有时候场地脏污使得错误识别提前退出,需要比较苛刻的约束,以后具体调试 */
         if ((TRACKER1_STATUS == t_color_black) || (TRACKER5_STATUS == t_color_black))
         {
-            // tracker_sendinfo();
+            tracker_sendinfo();
             /* 根据实际数据修改的条件 OK */
-            if ((TRACKER2_STATUS == t_color_white) && (TRACKER3_STATUS == t_color_white) && (TRACKER4_STATUS == t_color_white))
+            if ((TRACKER3_STATUS == t_color_white) && ((TRACKER3_STATUS == t_color_white) || (TRACKER4_STATUS == t_color_white)))
             {
                 STRAIGHT_LOG("STRAITHTEXIT\r\n");
                 tracking_resume();
+#if DEBUG_STRAIGHT
+                DEBUG_ACTIONSTOP;
+#endif
                 break;
             }
         }
@@ -454,8 +456,11 @@ void tracking_left(void)
     motor_setforward_right(RIGHTTURNBASE_RIGHT + LEFTTURN_ADD);
     motor_setbrake_left();
     motor_setbackward_left(LEFTTURNBASE_LEFT + LEFTTURN_SUB);
-    // Delay_ms(50);
+    Delay_ms(50);
     motor_setbrake_left();
+    motor_setforward_left(LEFTTURNBASE_LEFT - LEFTTURN_SUB);
+    
+    // motor_setbrake_left();
     for (;;)
     {
         if (ptracker_status->update == status_resloved)
@@ -466,11 +471,16 @@ void tracking_left(void)
         tracker_sendinfo();
         /* 中心和靠外圈的光电均为黑色退出转弯模式 */
         // if (TRACKER3_STATUS == t_color_black && TRACKER2_STATUS == t_color_black)
-        if (TRACKER2_STATUS == t_color_black)
+        if (TRACKER3_STATUS == t_color_black)
         {
-            tracker_sendinfo();
+            // tracker_sendinfo();
             tracking_resume();
             TRACKLEFT90_LOG("LEFT90EXIT");
+            brake();
+#if DEBUG_TRACKLEFT90
+            DEBUG_ACTIONSTOP;
+#endif
+
             break;
         }
         tracking_resume();
@@ -486,8 +496,9 @@ void tracking_right(void)
     motor_setforward_left(RIGHTTURNBASE_LEFT + RIGHTTURN_ADD);
     motor_setbrake_right();
     motor_setbackward_right(RIGHTTURNBASE_RIGHT + RIGHTTURN_SUB);
-    // Delay_ms(50);
+    Delay_ms(50);
     motor_setbrake_right();
+    motor_setforward_right(RIGHTTURNBASE_RIGHT - RIGHTTURN_SUB);
     for (;;)
     {
         if (ptracker_status->update == status_resloved)
@@ -496,26 +507,27 @@ void tracking_right(void)
             continue;
         }
         /* 中心和靠外圈的光电均为黑色退出转弯模式 */
-        if (TRACKER4_STATUS == t_color_black)
+        if (TRACKER3_STATUS == t_color_black)
         {
-            tracker_sendinfo();
+            // tracker_sendinfo();
             tracking_resume();
             TRACKRIGHT90_LOG("RIGHT90EXIT");
+            brake();
+#if DEBUG_TRACKRIGHT90
+            DEBUG_ACTIONSTOP;
+#endif
             break;
         }
         tracking_resume();
     }
 }
 
-
 /* 进环 */
 void circle_in(void)
 {
-
 }
 
 /* 出环 */
 void circle_out(void)
 {
-    
 }
