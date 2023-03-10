@@ -36,11 +36,11 @@
 #define GPIOB_IDR_BIT8 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 8 * 4))
 #define GPIOB_IDR_BIT9 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 9 * 4))
 
-#define TRACKER_PIN1 GPIOB_IDR_BIT3
-#define TRACKER_PIN2 GPIOB_IDR_BIT4
+#define TRACKER_PIN1 GPIOB_IDR_BIT9
+#define TRACKER_PIN2 GPIOB_IDR_BIT8
 #define TRACKER_PIN3 GPIOB_IDR_BIT5
-#define TRACKER_PIN4 GPIOB_IDR_BIT8
-#define TRACKER_PIN5 GPIOB_IDR_BIT9
+#define TRACKER_PIN4 GPIOB_IDR_BIT4
+#define TRACKER_PIN5 GPIOB_IDR_BIT3
 
 enum tracker_color
 {
@@ -183,17 +183,56 @@ void NVIC_tracker_init(void)
  *
  */
 #if TRACKER_POLLING
+typedef struct trackerfilter
+{
+    uint32_t filterbuf1[5];
+    uint32_t filterbuf2[5];
+    uint32_t filterbuf3[5];
+    uint32_t filterbuf4[5];
+    uint32_t filterbuf5[5];
+
+} trackerfilter_type;
+
+trackerfilter_type trackerfilter = {0};
+
 /**
  * @brief 中断频率为500hz 累计10次的采样总值 即实际控制处理频率约为50hz
  *
  */
 void TIM3_IRQHandler(void)
 {
+    volatile uint32_t * pfiltered = &tracker_status.tarcker1;
+    volatile uint32_t * pfilersrc = (volatile uint32_t *)&trackerfilter;
+    uint8_t temp;
     TIM3->SR = ~TIM_SR_UIF;
-    if (tracker_status.tracker_cnt_it > POLLING_CNT)
+    if (tracker_status.tracker_cnt_it == POLLING_CNT)
     {
         /* 关闭计数器 */
         TIM3->CR1 &= ~TIM_CR1_CEN;
+
+        tracker_status.tracker_cnt_it = 0;
+        for (int i = 0; i < 5; i++)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                if(*pfilersrc)
+                {
+                    temp++;
+                }
+                pfilersrc++;
+            }
+            if(temp > 4)
+            {
+                *pfiltered = 1;
+            }
+            else
+            {
+                *pfiltered = 0;
+            }
+            pfiltered++;
+        }
+        tracker_status.tracker_sum = 1800 + (300 * tracker_status.tarcker2) - (300 * tracker_status.tarcker4);
+
         /* 通知更新 */
         tracker_status.update = status_updated;
         return;
@@ -201,13 +240,12 @@ void TIM3_IRQHandler(void)
     {
         /* 将光电管的状态保存至内存 */
         // tracker_status.update = status_updated;
-        tracker_status.tarcker1 = TRACKER_PIN1;
-        tracker_status.tarcker2 = TRACKER_PIN2; // 1
-        tracker_status.tarcker3 = TRACKER_PIN3; // 1
-        tracker_status.tarcker4 = TRACKER_PIN4; // 1
-        tracker_status.tarcker5 = TRACKER_PIN5;
+        trackerfilter.filterbuf1[tracker_status.tracker_cnt_it] = TRACKER_PIN1;
+        trackerfilter.filterbuf2[tracker_status.tracker_cnt_it] = TRACKER_PIN2;
+        trackerfilter.filterbuf3[tracker_status.tracker_cnt_it] = TRACKER_PIN3;
+        trackerfilter.filterbuf4[tracker_status.tracker_cnt_it] = TRACKER_PIN4;
+        trackerfilter.filterbuf5[tracker_status.tracker_cnt_it] = TRACKER_PIN5;
         /* 将光电管的状态保存至内存 */
-        // tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
         tracker_status.tracker_cnt_it++;
     }
 }
@@ -218,11 +256,39 @@ void TIM3_IRQHandler(void)
  */
 void TIM1_UP_IRQHandler(void)
 {
+    volatile uint32_t * pfiltered = &tracker_status.tarcker1;
+    volatile uint32_t * pfilersrc = (volatile uint32_t *)&trackerfilter;
+    uint8_t temp = 0;
     TIM1->SR = ~TIM_SR_UIF;
-    if (tracker_status.tracker_cnt_it > POLLING_CNT)
+    if (tracker_status.tracker_cnt_it == POLLING_CNT)
     {
         /* 关闭计数器 */
         TIM1->CR1 &= ~TIM_CR1_CEN;
+
+        tracker_status.tracker_cnt_it = 0;
+        for (int i = 0; i < 5; i++)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                if(*pfilersrc)
+                {
+                    temp++;
+                }
+                pfilersrc++;
+            }
+            if(temp > 4)
+            {
+                *pfiltered = 1;
+            }
+            else
+            {
+                *pfiltered = 0;
+            }
+            temp = 0;
+            pfiltered++;
+        }
+        tracker_status.tracker_sum = 1800 + (300 * tracker_status.tarcker2) - (300 * tracker_status.tarcker4);
+
         /* 通知更新 */
         tracker_status.update = status_updated;
         return;
@@ -230,13 +296,12 @@ void TIM1_UP_IRQHandler(void)
     {
         /* 将光电管的状态保存至内存 */
         // tracker_status.update = status_updated;
-        tracker_status.tarcker1 = TRACKER_PIN1;
-        tracker_status.tarcker2 = TRACKER_PIN2; // 1
-        tracker_status.tarcker3 = TRACKER_PIN3; // 1
-        tracker_status.tarcker4 = TRACKER_PIN4; // 1
-        tracker_status.tarcker5 = TRACKER_PIN5;
+        trackerfilter.filterbuf1[tracker_status.tracker_cnt_it] = TRACKER_PIN1;
+        trackerfilter.filterbuf2[tracker_status.tracker_cnt_it] = TRACKER_PIN2;
+        trackerfilter.filterbuf3[tracker_status.tracker_cnt_it] = TRACKER_PIN3;
+        trackerfilter.filterbuf4[tracker_status.tracker_cnt_it] = TRACKER_PIN4;
+        trackerfilter.filterbuf5[tracker_status.tracker_cnt_it] = TRACKER_PIN5;
         /* 将光电管的状态保存至内存 */
-        // tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
         tracker_status.tracker_cnt_it++;
     }
 }
@@ -343,7 +408,7 @@ void tracking_resume(void)
 {
 #if TRACKER_POLLING
     /* 清除累计值 */
-    ptracker_status->tracker_sum_signed = 0;
+    // ptracker_status->tracker_sum = 0;
     /* 复位计数值 */
     ptracker_status->tracker_cnt_it = 0;
     /* 更新状态 */
@@ -371,8 +436,8 @@ void tracker_sendinfo(void)
         Usart_SendString(DEBUG_USARTx, (TRACKER4_STATUS ? "1 " : "0 "));
         Usart_SendString(DEBUG_USARTx, (TRACKER5_STATUS ? "1 " : "0 "));
         /* 取得累计值 */
-        Usart_SendHalfWord(DEBUG_USARTx, 0x0d0a);
-        // printf("total: %d \r\n", ptracker_status->tracker_sum_signed);
+        //Usart_SendHalfWord(DEBUG_USARTx, 0x0d0a);
+        printf("sum: %d \r\n", ptracker_status->tracker_sum);
         /* 更新状态 */
         // tracking_resume();
     }
@@ -459,7 +524,7 @@ void tracking_left(void)
     Delay_ms(50);
     motor_setbrake_left();
     motor_setforward_left(LEFTTURNBASE_LEFT - LEFTTURN_SUB);
-    
+
     // motor_setbrake_left();
     for (;;)
     {

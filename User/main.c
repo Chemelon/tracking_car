@@ -36,7 +36,7 @@ int main(void)
     Usart_SendString(DEBUG_USARTx, "system inited\r\n");
     stop();
     //gostraight(0);
-#if 0
+#if 1
     for(;;)
     {
         //printf("%d %d \r\n",TIM3->CNT,TIM4->CNT);

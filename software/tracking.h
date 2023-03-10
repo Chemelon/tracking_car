@@ -31,7 +31,7 @@ typedef struct tracker_status_struct
     volatile uint32_t tarcker4;
     volatile uint32_t tarcker5;
     volatile uint32_t tracker_cnt_it;
-    volatile int32_t tracker_sum_signed;
+    volatile uint32_t tracker_sum;
 } tracker_type;
 
 /**
@@ -67,7 +67,7 @@ void tracking_right(void);
 /* 定时器每秒中断次数,即采样频率 2~100000 */
 #define POLLING_FREQ 1000
 /* 采样次数 */
-#define POLLING_CNT 10
+#define POLLING_CNT 5
 
 /* 状态列表的状态数 */
 #define STATE_NUM 10
@@ -91,7 +91,7 @@ void tracking_right(void);
 /* 寻线90度右转log开关 */
 #define DEBUG_TRACKRIGHT90 1
 /* 寻线90度左转log开关 */
-#define DEBUG_TRACKLEFT90 0
+#define DEBUG_TRACKLEFT90 1
 
 #if DEBUG_STRAIGHT
 #define STRAIGHT_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
