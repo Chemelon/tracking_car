@@ -128,7 +128,7 @@ void tracking_right(void);
 #define TRACKRIGHT90_LOG(msg)
 #endif
 /* 向右转直角弯时差速PWM值 即左比右快的值 */
-#define RIGHTTURN_ADD 8000
+#define RIGHTTURN_ADD 10000
 /* 向右转直角弯时差速PWM值 即右比左慢的值 */
 #define RIGHTTURN_SUB 10000
 #define RIGHTTURNBASE_LEFT STRAIGHTBASE_LEFT

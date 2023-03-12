@@ -19,7 +19,7 @@ void servo_set_dutyclcle(uint16_t CCR_value)
  */
 void servo_setangle(uint16_t angle)
 {
-    S_PWM_CCR = (uint16_t)((angle / 180.0f) * S_PWM_CCR_180 + S_PWM_CCR_0);
+    S_PWM_CCR = (uint16_t)((angle * S_PWM_CCR_180) / 180  + S_PWM_CCR_0);
 }
 
 /**

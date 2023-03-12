@@ -21,11 +21,11 @@ int main(void)
     USART_Config();
     GPIO_PWM_init();
     TIM2_PWM_init();
-    //TIM1_PWM_init();
+    TIM1_PWM_init();
 #if TRACKER_POLLING
     GPIO_tracker_init_polling();
     //TIM3_tracker_init_polling();
-    TIM1_tracker_init_polling();
+    //TIM1_tracker_init_polling();
     NVIC_tracker_init_polling();
 #else
     GPIO_tracker_init();
@@ -35,40 +35,33 @@ int main(void)
 
     Usart_SendString(DEBUG_USARTx, "system inited\r\n");
     stop();
-    //gostraight(0);
 #if 1
+
     for(;;)
     {
         //printf("%d %d \r\n",TIM3->CNT,TIM4->CNT);
+        //servo_set_dutyclcle(1500);
+        servo_setangle(90);
         tracker_sendinfo();
         tracking_resume();
         Delay_ms(200);
     }
 #endif
 
-    stateswitcher();
-
-    for (;;)
-    {
-        servo_setangle(45);
-        Delay_ms(1000);
-        servo_setangle(135);
-        Delay_ms(1000);
-    }
-
+    //stateswitcher();
     /* TODO: 舵机的角度对应关系还没有调好 */
-    //    for (int i = 0;;i+=1)
-    //    {
-    //
-    //        Delay_ms(500);
-    //        servo_setangle(i);
-    //        printf("%d\r\n",i);
-    //        if (i > 180)
-    //        {
-    //            i = 0;
-    //        }
-    //        // Usart_SendString(DEBUG_USARTx, "running\r\n");
-    //    }
+       for (int i = 500;;i+=100)
+       {
+    
+           Delay_ms(500);
+           servo_set_dutyclcle(i);
+           printf("%d\r\n",i);
+           if (i > 2500)
+           {
+               i = 500;
+           }
+           Usart_SendString(DEBUG_USARTx, "running\r\n");
+       }
 }
 
 void DEBUG_USART_IRQHandler(void)

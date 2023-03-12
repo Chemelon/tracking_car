@@ -254,6 +254,7 @@ void TIM3_IRQHandler(void)
  * @brief 中断频率为1000hz 累计10次的采样总值 即实际控制处理频率约为100hz
  *
  */
+#if 0
 void TIM1_UP_IRQHandler(void)
 {
     volatile uint32_t * pfiltered = &tracker_status.tarcker1;
@@ -270,11 +271,10 @@ void TIM1_UP_IRQHandler(void)
         {
             for (int j = 0; j < 5; j++)
             {
-                if(*pfilersrc)
+                if(*pfilersrc++)
                 {
                     temp++;
                 }
-                pfilersrc++;
             }
             if(temp > 4)
             {
@@ -305,6 +305,32 @@ void TIM1_UP_IRQHandler(void)
         tracker_status.tracker_cnt_it++;
     }
 }
+#else
+void TIM1_UP_IRQHandler(void)
+{
+    TIM1->SR = ~TIM_SR_UIF;
+    if (tracker_status.tracker_cnt_it > POLLING_CNT)
+    {
+        /* 关闭计数器 */
+        TIM1->CR1 &= ~TIM_CR1_CEN;
+        /* 通知更新 */
+        tracker_status.update = status_updated;
+        return;
+    }
+    {
+        /* 将光电管的状态保存至内存 */
+        // tracker_status.update = status_updated;
+        tracker_status.tarcker1 = TRACKER_PIN1;
+        tracker_status.tarcker2 = TRACKER_PIN2; // 1
+        tracker_status.tarcker3 = TRACKER_PIN3; // 1
+        tracker_status.tarcker4 = TRACKER_PIN4; // 1
+        tracker_status.tarcker5 = TRACKER_PIN5;
+        /* 将光电管的状态保存至内存 */
+        // tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
+        tracker_status.tracker_cnt_it++;
+    }
+}
+#endif
 
 void GPIO_tracker_init_polling(void)
 {
@@ -572,7 +598,7 @@ void tracking_right(void)
             continue;
         }
         /* 中心和靠外圈的光电均为黑色退出转弯模式 */
-        if (TRACKER3_STATUS == t_color_black)
+        if (TRACKER3_STATUS == t_color_black && TRACKER1_STATUS == t_color_white && TRACKER5_STATUS == t_color_white)
         {
             // tracker_sendinfo();
             tracking_resume();
