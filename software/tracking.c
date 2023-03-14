@@ -3,6 +3,7 @@
 #include "FunctionList.h"
 #include "motor.h"
 #include "SysTick.h"
+#include "roundabout.h"
 
 #define TRACKER1_PERICMD RCC_APB2PeriphClockCmd
 #define TRACKER1_PERIPH RCC_APB2Periph_GPIOB
@@ -41,13 +42,6 @@
 #define TRACKER_PIN3 GPIOB_IDR_BIT5
 #define TRACKER_PIN4 GPIOB_IDR_BIT4
 #define TRACKER_PIN5 GPIOB_IDR_BIT3
-
-enum tracker_color
-{
-    t_color_white,
-    t_color_black
-
-};
 
 volatile static tracker_type tracker_status = {status_resloved, 0, 0, 0, 0, 0, 0, 0};
 volatile tracker_type *ptracker_status = &tracker_status;
@@ -201,8 +195,8 @@ trackerfilter_type trackerfilter = {0};
  */
 void TIM3_IRQHandler(void)
 {
-    volatile uint32_t * pfiltered = &tracker_status.tarcker1;
-    volatile uint32_t * pfilersrc = (volatile uint32_t *)&trackerfilter;
+    volatile uint32_t *pfiltered = &tracker_status.tarcker1;
+    volatile uint32_t *pfilersrc = (volatile uint32_t *)&trackerfilter;
     uint8_t temp;
     TIM3->SR = ~TIM_SR_UIF;
     if (tracker_status.tracker_cnt_it == POLLING_CNT)
@@ -215,13 +209,13 @@ void TIM3_IRQHandler(void)
         {
             for (int j = 0; j < 5; j++)
             {
-                if(*pfilersrc)
+                if (*pfilersrc)
                 {
                     temp++;
                 }
                 pfilersrc++;
             }
-            if(temp > 4)
+            if (temp > 4)
             {
                 *pfiltered = 1;
             }
@@ -308,26 +302,36 @@ void TIM1_UP_IRQHandler(void)
 #else
 void TIM1_UP_IRQHandler(void)
 {
+
     TIM1->SR = ~TIM_SR_UIF;
-    if (tracker_status.tracker_cnt_it > POLLING_CNT)
+    if (tracker_status.update == status_resloved)
     {
-        /* 关闭计数器 */
-        TIM1->CR1 &= ~TIM_CR1_CEN;
-        /* 通知更新 */
-        tracker_status.update = status_updated;
-        return;
-    }
-    {
-        /* 将光电管的状态保存至内存 */
-        // tracker_status.update = status_updated;
-        tracker_status.tarcker1 = TRACKER_PIN1;
-        tracker_status.tarcker2 = TRACKER_PIN2; // 1
-        tracker_status.tarcker3 = TRACKER_PIN3; // 1
-        tracker_status.tarcker4 = TRACKER_PIN4; // 1
-        tracker_status.tarcker5 = TRACKER_PIN5;
-        /* 将光电管的状态保存至内存 */
-        // tracker_status.tracker_sum_signed += GPIOB_IDR_BIT7 - GPIOB_IDR_BIT4;
+        {
+            tracker_status.tarcker1 = TRACKER_PIN1;
+            tracker_status.tarcker2 = TRACKER_PIN2; // 1
+            tracker_status.tarcker3 = TRACKER_PIN3; // 1
+            tracker_status.tarcker4 = TRACKER_PIN4; // 1
+            tracker_status.tarcker5 = TRACKER_PIN5;
+        }
         tracker_status.tracker_cnt_it++;
+        if ((tracker_status.tracker_cnt_it > POLLING_CNT))
+        {
+            if (TRACKER_PIN3)
+            {
+                tracker_status.tracker_sum = (TRACKER_PIN4 * 100) - (TRACKER_PIN2 * 100);
+            }
+            else
+            {
+                tracker_status.tracker_sum = (TRACKER_PIN4 * 200) - (TRACKER_PIN2 * 200);
+            }
+            /* 关闭计数器 */
+            // TIM1->CR1 &= ~TIM_CR1_CEN;
+            /* 复位计数值 */
+            ptracker_status->tracker_cnt_it = 0;
+            /* 通知更新 */
+            tracker_status.update = status_updated;
+            return;
+        }
     }
 }
 #endif
@@ -434,13 +438,11 @@ void tracking_resume(void)
 {
 #if TRACKER_POLLING
     /* 清除累计值 */
-    // ptracker_status->tracker_sum = 0;
-    /* 复位计数值 */
-    ptracker_status->tracker_cnt_it = 0;
+    ptracker_status->tracker_sum = 1000;
     /* 更新状态 */
     ptracker_status->update = status_resloved;
     /* 复位CNT */
-    TIM1->CNT = 0;
+    // TIM1->CNT = 0;
     /* 使能定时器 */
     TIM1->CR1 |= TIM_CR1_CEN;
 #else
@@ -462,7 +464,7 @@ void tracker_sendinfo(void)
         Usart_SendString(DEBUG_USARTx, (TRACKER4_STATUS ? "1 " : "0 "));
         Usart_SendString(DEBUG_USARTx, (TRACKER5_STATUS ? "1 " : "0 "));
         /* 取得累计值 */
-        //Usart_SendHalfWord(DEBUG_USARTx, 0x0d0a);
+        Usart_SendHalfWord(DEBUG_USARTx, 0x0d0a);
         printf("sum: %d \r\n", ptracker_status->tracker_sum);
         /* 更新状态 */
         // tracking_resume();
@@ -485,140 +487,13 @@ void stateswitcher(void)
         ;
 }
 
-/* 直线循迹 */
-void tracking_straight(void)
+void func_caller(void)
 {
-    /* TODO:找到舵机角度和pwm占空比关系 */
-    // servo_setangle(S_STRAIGHTWARD);
-    for (;;)
+    tracking_straight_pid();
+    beforeround();
+    circle_in(posit_left);
+    stop();
+    while (1)
     {
-        if (ptracker_status->update == status_resloved)
-        {
-            // STRAIGHT_LOG("STRAIGHTING\r\n");
-            continue;
-        }
-        // tracker_sendinfo();
-        /* 退出循环所需满足的条件 TODO:有时候场地脏污使得错误识别提前退出,需要比较苛刻的约束,以后具体调试 */
-        if ((TRACKER1_STATUS == t_color_black) || (TRACKER5_STATUS == t_color_black))
-        {
-            tracker_sendinfo();
-            /* 根据实际数据修改的条件 OK */
-            if ((TRACKER3_STATUS == t_color_white) && ((TRACKER3_STATUS == t_color_white) || (TRACKER4_STATUS == t_color_white)))
-            {
-                STRAIGHT_LOG("STRAITHTEXIT\r\n");
-                tracking_resume();
-#if DEBUG_STRAIGHT
-                DEBUG_ACTIONSTOP;
-#endif
-                break;
-            }
-        }
-        // STRAIGHT_LOG("UPDATED\r\n");
-        if (TRACKER4_STATUS == t_color_black)
-        {
-            /* 偏左 向右修正*/
-            // servo_setangle(S_RIGHTWARD);
-            motor_setforward_left(STRAIGHTBASE_LEFT + RIGHTWARD_ADD);
-            motor_setforward_right(STRAIGHTBASE_RIGHT);
-            tracker_sendinfo();
-            STRAIGHT_LOG("RIGHTWARD\r\n");
-        }
-        else if (TRACKER2_STATUS == t_color_black)
-        {
-            /* 偏右 向左修正*/
-            // servo_setangle(S_LEFTWARD);
-            motor_setforward_left(STRAIGHTBASE_LEFT);
-            motor_setforward_right(STRAIGHTBASE_RIGHT + LEFTWARD_ADD);
-            tracker_sendinfo();
-            STRAIGHT_LOG("LEFTWARD\r\n");
-        }
-        gostraight(0);
-        // servo_set_dutyclcle(2400);
-        tracking_resume();
-    }
-}
-
-/* 巡线90度左转 */
-void tracking_left(void)
-{
-    TRACKLEFT90_LOG("LEFT90IN");
-    /* 向左大转弯 右轮加速左轮减速 */
-    // servo_setangle(S_LEFT90);
-    motor_setforward_right(RIGHTTURNBASE_RIGHT + LEFTTURN_ADD);
-    motor_setbrake_left();
-    motor_setbackward_left(LEFTTURNBASE_LEFT + LEFTTURN_SUB);
-    Delay_ms(50);
-    motor_setbrake_left();
-    motor_setforward_left(LEFTTURNBASE_LEFT - LEFTTURN_SUB);
-
-    // motor_setbrake_left();
-    for (;;)
-    {
-        if (ptracker_status->update == status_resloved)
-        {
-            // TRACKLEFT90_LOG("LEFT90TURNING\r\n");
-            continue;
-        }
-        tracker_sendinfo();
-        /* 中心和靠外圈的光电均为黑色退出转弯模式 */
-        // if (TRACKER3_STATUS == t_color_black && TRACKER2_STATUS == t_color_black)
-        if (TRACKER3_STATUS == t_color_black)
-        {
-            // tracker_sendinfo();
-            tracking_resume();
-            TRACKLEFT90_LOG("LEFT90EXIT");
-            brake();
-#if DEBUG_TRACKLEFT90
-            DEBUG_ACTIONSTOP;
-#endif
-
-            break;
-        }
-        tracking_resume();
-    }
-}
-
-/* 巡线90度右转 */
-void tracking_right(void)
-{
-    TRACKRIGHT90_LOG("RIGHT90IN");
-    /* 向右大转弯 左轮加速右轮减速 */
-    // servo_setangle(S_RIGHT90);
-    motor_setforward_left(RIGHTTURNBASE_LEFT + RIGHTTURN_ADD);
-    motor_setbrake_right();
-    motor_setbackward_right(RIGHTTURNBASE_RIGHT + RIGHTTURN_SUB);
-    Delay_ms(50);
-    motor_setbrake_right();
-    motor_setforward_right(RIGHTTURNBASE_RIGHT - RIGHTTURN_SUB);
-    for (;;)
-    {
-        if (ptracker_status->update == status_resloved)
-        {
-            // TRACKRIGHT90_LOG("RIGHT90TURNING\r\n");
-            continue;
-        }
-        /* 中心和靠外圈的光电均为黑色退出转弯模式 */
-        if (TRACKER3_STATUS == t_color_black && TRACKER1_STATUS == t_color_white && TRACKER5_STATUS == t_color_white)
-        {
-            // tracker_sendinfo();
-            tracking_resume();
-            TRACKRIGHT90_LOG("RIGHT90EXIT");
-            brake();
-#if DEBUG_TRACKRIGHT90
-            DEBUG_ACTIONSTOP;
-#endif
-            break;
-        }
-        tracking_resume();
-    }
-}
-
-/* 进环 */
-void circle_in(void)
-{
-}
-
-/* 出环 */
-void circle_out(void)
-{
+    };
 }

@@ -3,6 +3,10 @@
 #include "stm32f10x.h"
 #include "motor.h"
 #include "tracking.h"
+#include "straight.h"
+#include "turning.h"
+#include "roundabout.h"
+#include "curve-8.h"
 #include <stdio.h>
 
 #define FUNC_0X00 tracking_straight

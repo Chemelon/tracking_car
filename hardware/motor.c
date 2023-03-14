@@ -137,6 +137,7 @@ void goback(uint16_t speed)
  */
 void gostraight(uint16_t speed)
 {
+    servo_setangle(90);
     motor_setforward_left(STRAIGHTBASE_LEFT + speed);
     motor_setforward_right(STRAIGHTBASE_RIGHT + speed);
 }

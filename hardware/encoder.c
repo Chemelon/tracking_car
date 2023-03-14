@@ -8,7 +8,6 @@ void encoder_init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB, ENABLE);
     RCC->APB1ENR |= RCC_APB1ENR_TIM3EN | RCC_APB1ENR_TIM4EN;
     
-    /* TODO:这样写不能使能TIM4?????? */
     //RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3 | RCC_APB1Periph_TIM4, ENABLE);
 
     gpio_init_struct.GPIO_Mode = GPIO_Mode_IPD;
@@ -46,7 +45,7 @@ void encoder_init(void)
     TIM3->CNT = 0;
     TIM4->CNT = 0;
 
-    TIM_Cmd(TIM3, ENABLE);
+    //TIM_Cmd(TIM3, ENABLE);
     TIM_Cmd(TIM4, ENABLE);
 }
 
