@@ -524,9 +524,19 @@ void func_caller(void)
     //pid_integral = -4500; 
     tracking_cross();
     tracking_right();
-    pid_integral = 4500;
-    tracking_straight_pid();    
     
+    pid_integral = 7000;
+    tracking_straight_pid_s(2000);
+    
+    tracking_right();
+    pid_integral = 4500; 
+    tracking_straight_pid();
+    tracking_left();
+    pid_integral = -4500; 
+    tracking_straight_pid();
+    tracking_left();
+    pid_integral = -4500; 
+    tracking_straight_pid();
     
     stop();
     while (1)

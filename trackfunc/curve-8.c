@@ -8,22 +8,19 @@
 /* 出口条件不同的直线循迹函数 */
 void before_curve(void)
 {
-
-    servo_setangle(90);
     for (;;)
     {
         if (ptracker_status->update == status_resloved)
         {
             continue;
         }
-        if (((TRACKER1_STATUS == t_color_black) && (TRACKER5_STATUS == t_color_black)) &&
-            ((TRACKER2_STATUS + TRACKER3_STATUS + TRACKER4_STATUS) < 3))
+        if (TIM3->CNT > 3000)
         {
             brake();
             tracking_resume();
             servo_setangle(90);
-            STRAIGHT_LOG("STRAITHTEXIT\r\n");
-#if DEBUG_STRAIGHT
+            STRAIGHT_LOG("CURVEEXIT\r\n");
+#if DEBUG_CURVE
             DEBUG_ACTIONSTOP;
 #endif
             break;

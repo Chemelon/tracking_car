@@ -23,6 +23,7 @@
 
 void tracking_cross(void);
 void tracking_cross_pid(void);
+void tracking_straight_pid_s(uint16_t s);
 void tracking_straight(void);
 void tracking_straight_pid(void);
 

@@ -50,11 +50,12 @@ void tracking_right(void)
     servo_setangle(S_RIGHT90);
     motor_setforward_left(RIGHTTURNBASE_LEFT + RIGHTTURN_ADD);
     motor_setbrake_right();
-    motor_setbackward_right(RIGHTTURNBASE_RIGHT + 2500);
+    motor_setbackward_right(RIGHTTURNBASE_RIGHT + 3000);
     Delay_ms(28);
+    motor_setforward_left(RIGHTTURNBASE_LEFT);
     motor_setbrake_right();
     motor_setforward_right(RIGHTTURNBASE_RIGHT + 3000);
-    Delay_ms(70);
+    Delay_ms(55);
     for (;;)
     {
         if (ptracker_status->update == status_resloved)
@@ -64,7 +65,9 @@ void tracking_right(void)
         /* 中心和靠外圈的光电均为黑色退出转弯模式 */
         if (TRACKER4_STATUS == t_color_black && TRACKER1_STATUS == t_color_white && TRACKER5_STATUS == t_color_white)
         {
-            servo_setangle(70);
+            servo_setangle(65);
+            motor_setforward_right(RIGHTTURNBASE_RIGHT);
+            motor_setforward_left(RIGHTTURNBASE_LEFT);
             brake();
             tracking_resume();
             TRACKRIGHT90_LOG("RIGHT90EXIT");

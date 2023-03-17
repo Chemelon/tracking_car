@@ -30,7 +30,7 @@
 #endif
 #define S_RIGHT90 135
 /* 向右转直角弯时差速PWM值 即左比右快的值 */
-#define RIGHTTURN_ADD 1500
+#define RIGHTTURN_ADD 3000
 /* 向右转直角弯时差速PWM值 即右比左慢的值 */
 #define RIGHTTURN_SUB 1000
 #define RIGHTTURNBASE_LEFT STRAIGHTBASE_LEFT

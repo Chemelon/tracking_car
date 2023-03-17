@@ -2,6 +2,7 @@
 #define __CURVE8_H
 #include "stm32f10x.h"
 
+#define DEBUG_CURVE 1
 
 #endif
 
