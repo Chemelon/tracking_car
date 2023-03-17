@@ -24,7 +24,7 @@ void beforeround(void)
                 TIM3->CR1 &= ~TIM_CR1_CEN;
                 TIM3->CNT = 0;
                 TIM3->CR1 |= TIM_CR1_CEN;
-                for (; TIM3->CNT < 250;)
+                for (; TIM3->CNT < 350;)
                 {
                     tracking_resume();
                 }
@@ -57,6 +57,7 @@ void beforeround(void)
 /* 进环 */
 void circle_in(roundabout_posit_type round_posit)
 {
+    //static uint8_t cnt = 0;
     /* 启动定时器 */
     TIM3->CR1 &= ~TIM_CR1_CEN;
     TIM3->CNT = 0;
@@ -72,42 +73,54 @@ void circle_in(roundabout_posit_type round_posit)
                 continue;
             }
             /* 出口条件 */
-            if (TRACKER5_STATUS == t_color_black && (TIM3->CNT > 1500))
+            if ((TIM3->CNT > 9300) && TRACKER3_STATUS == t_color_black)
             {
+                tracking_resume();
                 /* 关闭定时器 */
                 TIM3->CR1 &= ~TIM_CR1_CEN;
                 TIM3->CNT = 0;
-                tracking_resume();
-                DEBUG_ACTIONSTOP;
+                /* 出弯时 */
+                //DEBUG_ACTIONSTOP;
                 break;
             }
-            if (TRACKER2_STATUS == t_color_black || TRACKER3_STATUS == t_color_black)
+            if (TIM3->CNT > 8300)
             {
-                /* 向内修正(左) */
-                if ((TIM3->CNT < 1500))
+                //DEBUG_ACTIONSTOP;
+                if (TRACKER4_STATUS == t_color_black || TRACKER3_STATUS == t_color_black)
                 {
-                    servo_setangle(80);
+                    /* 沿外圈循迹 出环 */
+                    servo_setangle(93);
+                    motor_setforward_left(ROUND_LEFTBASE - 3000);
+                    motor_setforward_right(ROUND_RIGHTBASE - 4000);
                 }
-                else
+                else if (TRACKER2_STATUS == t_color_white)
                 {
-                    servo_setangle(ROUND_LEFTANGLE);
+                    /* 向内修正 */
+                    servo_setangle(75);
+                    motor_setforward_right(ROUND_LEFTBASE - 2000);
+                    motor_setforward_left(ROUND_LEFTBASE - 4000);
                 }
-                motor_setforward_right(ROUND_LEFTBASE + ROUND_LEFTADD);
-                motor_setforward_left(ROUND_LEFTBASE - ROUND_LEFTSUB);
             }
-            else if (TRACKER4_STATUS == t_color_black)
+            else
             {
-                /* 向外修正 */
-                if ((TIM3->CNT < 1500))
+                if (TRACKER2_STATUS == t_color_black || TRACKER3_STATUS == t_color_black)
                 {
-                    servo_setangle(100);
+                    /* 向内修正 */
+                    {
+                        servo_setangle(ROUND_LEFTANGLE);
+                    }
+                    motor_setforward_right(ROUND_LEFTBASE + ROUND_LEFTADD);
+                    motor_setforward_left(ROUND_LEFTBASE - ROUND_LEFTSUB);
                 }
-                else
+                else if (TRACKER4_STATUS == t_color_black)
                 {
-                    servo_setangle(ROUND_RIGHTANGLE);
+                    /* 向外修正 */
+                    {
+                        servo_setangle(ROUND_RIGHTANGLE);
+                    }
+                    motor_setforward_right(ROUND_RIGHTBASE);
+                    motor_setforward_left(ROUND_RIGHTBASE);
                 }
-                motor_setforward_right(ROUND_RIGHTBASE + ROUND_RIGHTADD);
-                motor_setforward_left(ROUND_RIGHTBASE - ROUND_RIGHTSUB);
             }
             tracking_resume();
         }

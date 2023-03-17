@@ -3,7 +3,7 @@
 #include "usart.h"
 
 /* 直线循迹log开关 */
-#define DEBUG_STRAIGHT 0
+#define DEBUG_STRAIGHT 1
 
 #if DEBUG_STRAIGHT
 #define STRAIGHT_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
@@ -22,6 +22,7 @@
 #define LEFTWARD_ADD 2000
 
 void tracking_cross(void);
+void tracking_cross_pid(void);
 void tracking_straight(void);
 void tracking_straight_pid(void);
 

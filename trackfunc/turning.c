@@ -11,11 +11,11 @@ void tracking_left(void)
     servo_setangle(S_LEFT90);
     motor_setforward_right(RIGHTTURNBASE_RIGHT + LEFTTURN_ADD);
     motor_setbrake_left();
-    motor_setbackward_left(LEFTTURNBASE_LEFT + 1000);
-    Delay_ms(20);
+    motor_setbackward_left(LEFTTURNBASE_LEFT + 2000);
+    Delay_ms(25);
     motor_setbrake_left();
     motor_setforward_left(LEFTTURNBASE_LEFT + 3000);
-    Delay_ms(100);
+    Delay_ms(70);
 
     for (;;)
     {
@@ -29,7 +29,7 @@ void tracking_left(void)
         // if (TRACKER3_STATUS == t_color_black && TRACKER2_STATUS == t_color_black)
         if (TRACKER2_STATUS == t_color_black && TRACKER5_STATUS == t_color_white &&  TRACKER1_STATUS== t_color_white)
         {
-            servo_setangle(105);
+            servo_setangle(110);
             brake();
             tracking_resume();
             TRACKLEFT90_LOG("LEFT90EXIT");
@@ -50,11 +50,11 @@ void tracking_right(void)
     servo_setangle(S_RIGHT90);
     motor_setforward_left(RIGHTTURNBASE_LEFT + RIGHTTURN_ADD);
     motor_setbrake_right();
-    motor_setbackward_right(RIGHTTURNBASE_RIGHT + 1000);
-    Delay_ms(20);
+    motor_setbackward_right(RIGHTTURNBASE_RIGHT + 2500);
+    Delay_ms(28);
     motor_setbrake_right();
     motor_setforward_right(RIGHTTURNBASE_RIGHT + 3000);
-    Delay_ms(100);
+    Delay_ms(70);
     for (;;)
     {
         if (ptracker_status->update == status_resloved)
@@ -64,7 +64,7 @@ void tracking_right(void)
         /* 中心和靠外圈的光电均为黑色退出转弯模式 */
         if (TRACKER4_STATUS == t_color_black && TRACKER1_STATUS == t_color_white && TRACKER5_STATUS == t_color_white)
         {
-            servo_setangle(75);
+            servo_setangle(70);
             brake();
             tracking_resume();
             TRACKRIGHT90_LOG("RIGHT90EXIT");

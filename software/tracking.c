@@ -491,24 +491,43 @@ void stateswitcher(void)
 }
 
 void func_caller(void)
-{
-    // tracking_straight_pid();
-    // tracking_left();
-    // //pid_integral = 0;
-    // tracking_cross();
-    // tracking_right();
-    // //Delay_ms(1000);
-    // pid_integral = 4000;
-    // tracking_straight_pid();
-    // tracking_right();
-    // pid_integral = 4000; 
-    // tracking_straight_pid();
-    // tracking_left();
-    // pid_integral = -4000; 
-    // tracking_straight_pid();
-    // tracking_left();
+{    
+    tracking_straight_pid();
+    tracking_left();
+
+    pid_integral = -4500; 
+    tracking_cross_pid();
+    Delay_ms(50);
+    //tracking_cross();
+    tracking_right();
+
+    pid_integral = 4500;
+    tracking_straight_pid();
+    tracking_right();
+    pid_integral = 4500; 
+    tracking_straight_pid();
+    tracking_left();
+    pid_integral = -4500; 
+    tracking_straight_pid();
+    tracking_left();
+    
     beforeround();
     circle_in(posit_left);
+    pid_integral = -2000;
+    tracking_straight_pid();
+    
+    tracking_left();
+    pid_integral = -4500; 
+    tracking_straight_pid();
+    tracking_left();
+    
+    //pid_integral = -4500; 
+    tracking_cross();
+    tracking_right();
+    pid_integral = 4500;
+    tracking_straight_pid();    
+    
+    
     stop();
     while (1)
     {
