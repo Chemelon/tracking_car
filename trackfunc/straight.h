@@ -3,7 +3,7 @@
 #include "usart.h"
 
 /* 直线循迹log开关 */
-#define DEBUG_STRAIGHT 1
+#define DEBUG_STRAIGHT 0
 
 #if DEBUG_STRAIGHT
 #define STRAIGHT_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)
@@ -21,6 +21,7 @@
 /* 向左修正时差速PWM值 即右比左快的值 */
 #define LEFTWARD_ADD 2000
 
+void tracking_cross(void);
 void tracking_straight(void);
 void tracking_straight_pid(void);
 

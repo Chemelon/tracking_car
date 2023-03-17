@@ -1,5 +1,6 @@
 #include "pid.h"
 
+int32_t pid_integral = 0;
 /**
  * @brief 位置式pid
  *
@@ -14,7 +15,6 @@ int32_t positional_pid_int(pid_type_int *pid_this, int32_t target, int32_t real)
 	int32_t kp = pid_this->kp;
 	int32_t ki = pid_this->ki;
 	int32_t kd = pid_this->kd;
-	static int32_t pid_integral = 0;
 	static int32_t err_priv = 0;
 	int32_t pid_delta, pid_err;
 

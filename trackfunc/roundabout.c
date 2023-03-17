@@ -17,23 +17,36 @@ void beforeround(void)
             /* 根据实际数据修改的条件 OK */
             if (TRACKER3_STATUS == t_color_black)
             {
-                servo_setangle(90);
-                tracking_resume();
+                /* 入弯前走一段直线 */
+                gostraight(0);
+                servo_setangle(87);
+                /* 启动定时器 */
+                TIM3->CR1 &= ~TIM_CR1_CEN;
+                TIM3->CNT = 0;
+                TIM3->CR1 |= TIM_CR1_CEN;
+                for (; TIM3->CNT < 250;)
+                {
+                    tracking_resume();
+                }
+                /* 关闭定时器 */
+                TIM3->CR1 &= ~TIM_CR1_CEN;
+                TIM3->CNT = 0;
                 brake();
+                // DEBUG_ACTIONSTOP;
                 break;
             }
         }
         if (TRACKER4_STATUS == t_color_black)
         {
             /* 偏左 向右修正*/
-            servo_setangle(100);
+            servo_setangle(95);
             motor_setforward_left(STRAIGHTBASE_LEFT + 2000);
             motor_setforward_right(STRAIGHTBASE_RIGHT);
         }
         else if (TRACKER2_STATUS == t_color_black)
         {
             /* 偏右 向左修正*/
-            servo_setangle(80);
+            servo_setangle(85);
             motor_setforward_left(STRAIGHTBASE_LEFT);
             motor_setforward_right(STRAIGHTBASE_RIGHT + 2000);
         }
@@ -41,11 +54,11 @@ void beforeround(void)
     }
 }
 
-
 /* 进环 */
 void circle_in(roundabout_posit_type round_posit)
 {
-    // TIM3->CR1 &= ~TIM_CR1_CEN;
+    /* 启动定时器 */
+    TIM3->CR1 &= ~TIM_CR1_CEN;
     TIM3->CNT = 0;
     TIM3->CR1 |= TIM_CR1_CEN;
     switch (round_posit)
@@ -61,6 +74,10 @@ void circle_in(roundabout_posit_type round_posit)
             /* 出口条件 */
             if (TRACKER5_STATUS == t_color_black && (TIM3->CNT > 1500))
             {
+                /* 关闭定时器 */
+                TIM3->CR1 &= ~TIM_CR1_CEN;
+                TIM3->CNT = 0;
+                tracking_resume();
                 DEBUG_ACTIONSTOP;
                 break;
             }

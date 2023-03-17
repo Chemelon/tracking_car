@@ -1,6 +1,7 @@
 #include "tracking.h"
 #include "usart.h"
 #include "FunctionList.h"
+#include "pid.h"
 #include "motor.h"
 #include "SysTick.h"
 #include "roundabout.h"
@@ -323,6 +324,8 @@ void TIM1_UP_IRQHandler(void)
             else
             {
                 tracker_status.tracker_sum = (TRACKER_PIN4 * 200) - (TRACKER_PIN2 * 200);
+                tracker_status.tracker_sum += TRACKER_PIN5 * 300 - TRACKER_PIN1 * 300; 
+                
             }
             /* 关闭计数器 */
             // TIM1->CR1 &= ~TIM_CR1_CEN;
@@ -465,7 +468,7 @@ void tracker_sendinfo(void)
         Usart_SendString(DEBUG_USARTx, (TRACKER5_STATUS ? "1 " : "0 "));
         /* 取得累计值 */
         Usart_SendHalfWord(DEBUG_USARTx, 0x0d0a);
-        printf("sum: %d \r\n", ptracker_status->tracker_sum);
+        //printf("sum: %d \r\n", ptracker_status->tracker_sum);
         /* 更新状态 */
         // tracking_resume();
     }
@@ -489,7 +492,21 @@ void stateswitcher(void)
 
 void func_caller(void)
 {
-    tracking_straight_pid();
+    // tracking_straight_pid();
+    // tracking_left();
+    // //pid_integral = 0;
+    // tracking_cross();
+    // tracking_right();
+    // //Delay_ms(1000);
+    // pid_integral = 4000;
+    // tracking_straight_pid();
+    // tracking_right();
+    // pid_integral = 4000; 
+    // tracking_straight_pid();
+    // tracking_left();
+    // pid_integral = -4000; 
+    // tracking_straight_pid();
+    // tracking_left();
     beforeround();
     circle_in(posit_left);
     stop();

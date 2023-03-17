@@ -5,8 +5,6 @@
 #include "math.h"
 
 /* 直线循迹 */
-#define EXIT_COND (((TRACKER1_STATUS == t_color_black) || (TRACKER5_STATUS == t_color_black)) && \
-                   ((TRACKER2_STATUS + TRACKER3_STATUS + TRACKER4_STATUS) < 2))
 void tracking_straight(void)
 {
     servo_setangle(S_STRAIGHTWARD);
@@ -16,13 +14,54 @@ void tracking_straight(void)
         {
             continue;
         }
-        if (EXIT_COND)
+        if (((TRACKER1_STATUS == t_color_black) || (TRACKER5_STATUS == t_color_black)) && ((TRACKER3_STATUS == t_color_white && (TRACKER3_STATUS + TRACKER4_STATUS) < 2)))
         {
-#undef EXIT_COND
+            brake();
+            tracking_resume();
             servo_setangle(S_STRAIGHTWARD);
             STRAIGHT_LOG("STRAITHTEXIT\r\n");
-            tracking_resume();
+#if DEBUG_STRAIGHT
+            DEBUG_ACTIONSTOP;
+#endif
+            break;
+        }
+        if (TRACKER4_STATUS == t_color_black)
+        {
+            /* 偏左 向右修正*/
+            servo_setangle(S_RIGHTWARD);
+            motor_setforward_left(STRAIGHTBASE_LEFT + RIGHTWARD_ADD);
+            motor_setforward_right(STRAIGHTBASE_RIGHT);
+            STRAIGHT_LOG("RIGHTWARD\r\n");
+        }
+        else if (TRACKER2_STATUS == t_color_black)
+        {
+            /* 偏右 向左修正*/
+            servo_setangle(S_LEFTWARD);
+            motor_setforward_left(STRAIGHTBASE_LEFT);
+            motor_setforward_right(STRAIGHTBASE_RIGHT + LEFTWARD_ADD);
+            STRAIGHT_LOG("LEFTWARD\r\n");
+        }
+        // STRAIGHT_LOG("STRAIGHTING\r\n");
+        tracking_resume();
+    }
+}
+
+/* 直线循迹 */
+void tracking_cross(void)
+{
+    servo_setangle(S_STRAIGHTWARD);
+    for (;;)
+    {
+        if (ptracker_status->update == status_resloved)
+        {
+            continue;
+        }
+        if (TRACKER1_STATUS + TRACKER2_STATUS + TRACKER3_STATUS + TRACKER4_STATUS + TRACKER5_STATUS > 2)
+        {
             brake();
+            tracking_resume();
+            servo_setangle(S_STRAIGHTWARD);
+            STRAIGHT_LOG("CROSSEXIT\r\n");
 #if DEBUG_STRAIGHT
             DEBUG_ACTIONSTOP;
 #endif
@@ -32,19 +71,17 @@ void tracking_straight(void)
         if (TRACKER4_STATUS == t_color_black)
         {
             /* 偏左 向右修正*/
-            servo_setangle(S_RIGHTWARD);
-            motor_setforward_left(STRAIGHTBASE_LEFT + RIGHTWARD_ADD);
+            servo_setangle(95);
+            motor_setforward_left(STRAIGHTBASE_LEFT + 2000);
             motor_setforward_right(STRAIGHTBASE_RIGHT);
-            // tracker_sendinfo();
             STRAIGHT_LOG("RIGHTWARD\r\n");
         }
         else if (TRACKER2_STATUS == t_color_black)
         {
             /* 偏右 向左修正*/
-            servo_setangle(S_LEFTWARD);
+            servo_setangle(85);
             motor_setforward_left(STRAIGHTBASE_LEFT);
-            motor_setforward_right(STRAIGHTBASE_RIGHT + LEFTWARD_ADD);
-            // tracker_sendinfo();
+            motor_setforward_right(STRAIGHTBASE_RIGHT + 2000);
             STRAIGHT_LOG("LEFTWARD\r\n");
         }
         STRAIGHT_LOG("STRAIGHTING\r\n");
@@ -53,12 +90,11 @@ void tracking_straight(void)
 }
 
 /* 直线循迹pid */
-#define EXIT_COND (TRACKER2_STATUS == t_color_black && TRACKER3_STATUS == t_color_black && TRACKER4_STATUS == t_color_black)
-#define DELTA_MAX 10000
+#define DELTA_MAX 12000
 // 往右偏为正
 void tracking_straight_pid(void)
 {
-    pid_type_int straight_pid = {200, 1, 0};
+    pid_type_int straight_pid = {750, 2, 0};
     int32_t delta = 0, angle = 0;
     servo_setangle(S_STRAIGHTWARD);
     for (;;)
@@ -68,9 +104,15 @@ void tracking_straight_pid(void)
             continue;
         }
 
-        if (EXIT_COND)
+        if ((TRACKER1_STATUS == t_color_black) || (TRACKER5_STATUS == t_color_black))
         {
-            stop();
+            if(TRACKER3_STATUS == t_color_white && (TRACKER2_STATUS == t_color_white || TRACKER4_STATUS == t_color_white))
+            {
+                brake();
+                tracking_resume();
+                //DEBUG_ACTIONSTOP;
+                break;
+            }
         }
         delta = positional_pid_int(&straight_pid, (int32_t)0, (int32_t)ptracker_status->tracker_sum);
         if (delta > DELTA_MAX)
@@ -81,21 +123,17 @@ void tracking_straight_pid(void)
         {
             delta = (-DELTA_MAX);
         }
-//        if (delta > 0)
+        angle = delta / (DELTA_MAX / 8);
+        if (delta > 8000)
+            angle = (delta - 1700) / (DELTA_MAX / 15);
+        if (delta < 8000)
+            angle = (delta + 1700) / (DELTA_MAX / 15);
         {
-            // 右偏
-            servo_setangle(90);
+            servo_setangle(90 - angle);
             motor_setforward_left(STRAIGHTBASE_LEFT - delta);
             motor_setforward_right(STRAIGHTBASE_RIGHT + delta);
         }
-//        else
-//        {
-//            // 左偏
-//            servo_setangle(90 + angle);
-//            motor_setforward_left(STRAIGHTBASE_LEFT - delta);
-//            motor_setforward_right(STRAIGHTBASE_RIGHT + delta);
-//        }
-        tracker_sendinfo();
+        // tracker_sendinfo();
         printf("%d %d\r\n", delta, angle);
         tracking_resume();
     }

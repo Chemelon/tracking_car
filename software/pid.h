@@ -2,6 +2,8 @@
 #define __PID_H
 #include "stm32f10x.h"
 
+extern int32_t pid_integral;
+
 typedef struct pid_type_int
 {
     int32_t kp;

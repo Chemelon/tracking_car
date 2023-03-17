@@ -3,9 +3,9 @@
 #include "usart.h"
 
 /* 寻线90度右转log开关 */
-#define DEBUG_TRACKRIGHT90 1
+#define DEBUG_TRACKRIGHT90 0
 /* 寻线90度左转log开关 */
-#define DEBUG_TRACKLEFT90 1
+#define DEBUG_TRACKLEFT90 0
 
 
 #if DEBUG_TRACKLEFT90
@@ -13,10 +13,11 @@
 #else
 #define TRACKLEFT90_LOG(msg)
 #endif
+#define S_LEFT90 45
 /* 向左转直角弯时差速PWM值 即右比左快的值 CCMR 最大值2000*/
-#define LEFTTURN_ADD 8000
+#define LEFTTURN_ADD 2000
 /* 向左转直角弯时差速PWM值 即左比右慢的值 */
-#define LEFTTURN_SUB 10000
+#define LEFTTURN_SUB 1000
 #define LEFTTURNBASE_LEFT STRAIGHTBASE_LEFT
 #define RIGHTTURNBASE_RIGHT STRAIGHTBASE_RIGHT
 
@@ -27,9 +28,9 @@
 #else
 #define TRACKRIGHT90_LOG(msg)
 #endif
-#define S_RIGHT90 145
+#define S_RIGHT90 135
 /* 向右转直角弯时差速PWM值 即左比右快的值 */
-#define RIGHTTURN_ADD 3000
+#define RIGHTTURN_ADD 2000
 /* 向右转直角弯时差速PWM值 即右比左慢的值 */
 #define RIGHTTURN_SUB 1000
 #define RIGHTTURNBASE_LEFT STRAIGHTBASE_LEFT
