@@ -512,15 +512,15 @@ void func_caller(void)
     beforeround();
     circle_in(posit_left);
     Delay_ms(1000);
-    pid_integral = -100;
+    pid_integral = -200;
     tracking_straight_pid();
     
     tracking_left();
-    pid_integral = -3500; 
+    pid_integral = -3000; 
     tracking_straight_pid();
     tracking_left();
     
-    pid_integral = -3500; 
+    pid_integral = -3000; 
     tracking_cross_pid();
     tracking_crossright();
     //tracking_right();

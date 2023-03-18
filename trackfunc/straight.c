@@ -141,9 +141,9 @@ void tracking_straight_pid(void)
         if (delta < 8000)
             angle = (delta + 1700) / (DELTA_MAX / 15);
         {
-            servo_setangle(90 - angle);
-            motor_setforward_left(STRAIGHTBASE_LEFT - delta);
-            motor_setforward_right(STRAIGHTBASE_RIGHT + delta);
+            motor_setforward_left(((int32_t)STRAIGHTBASE_LEFT - delta) & 0xffff);
+            motor_setforward_right(((int32_t)STRAIGHTBASE_RIGHT + delta) & 0xffff);
+            servo_setangle(((int32_t)90 - angle) & 0xffff);
         }
         // tracker_sendinfo();
         // printf("%d %d\r\n", delta, angle);
@@ -204,9 +204,9 @@ void tracking_straight_pid_s(uint16_t s)
         if (delta < 8000)
             angle = (delta + 1700) / (DELTA_MAX / 15);
         {
-            servo_setangle(90 - angle);
-            motor_setforward_left(STRAIGHTBASE_LEFT - delta);
-            motor_setforward_right(STRAIGHTBASE_RIGHT + delta);
+            motor_setforward_left(((int32_t)STRAIGHTBASE_LEFT - delta) & 0xffff);
+            motor_setforward_right(((int32_t)STRAIGHTBASE_RIGHT + delta) & 0xffff);
+            servo_setangle(((int32_t)90 - angle) & 0xffff);
         }
         // tracker_sendinfo();
         // printf("%d %d\r\n", delta, angle);
@@ -214,12 +214,12 @@ void tracking_straight_pid_s(uint16_t s)
     }
 }
 
-pid_type_int independent_pid = {30, 8, 26, 7000, -7000, 0};
+pid_type_int independent_pid = {15, 7, 1, 7000, -7000, 0};
 #define NEW_MAX 12000
 /* 按距离屏蔽光电 且巡线固定距离的高速PID巡线 */
-void tracking_straightfast_pid_sm(uint16_t s, uint16_t m)
+void tracking_straightfast_pid_sm(uint16_t s, uint16_t m, int32_t basespeed)
 {
-    int16_t basespeed = 20000;
+    // int32_t basespeed = 20000;
     /* 启动定时器 */
     TIM3->CR1 &= ~TIM_CR1_CEN;
     TIM3->CNT = 0;
@@ -264,7 +264,7 @@ void tracking_straightfast_pid_sm(uint16_t s, uint16_t m)
                 }
             }
         }
-        delta = positional_pid_int_independent(&independent_pid, (int32_t)0, (int32_t)ptracker_status->tracker_sum);
+        delta = positional_pid_int_independent(&independent_pid, (int32_t)0, ptracker_status->tracker_sum);
         if (delta > NEW_MAX)
         {
             delta = NEW_MAX;
@@ -273,15 +273,15 @@ void tracking_straightfast_pid_sm(uint16_t s, uint16_t m)
         {
             delta = (-NEW_MAX);
         }
-        angle = delta / (NEW_MAX / 25);
+        angle = delta / (NEW_MAX / 30);
         // if (delta > 8000)
         //     angle = (delta - 2000) / (NEW_MAX / 15);
         // if (delta < 8000)
         //     angle = (delta + 2000) / (NEW_MAX / 15);
 
-        motor_setforward_left(basespeed - delta);
-        motor_setforward_right(basespeed + delta);
-        servo_setangle(90 - angle);
+        motor_setforward_left((basespeed - delta) & 0xffff);
+        motor_setforward_right((basespeed + delta) & 0xffff);
+        servo_setangle(((int32_t)90 - angle) & 0xffff);
         tracking_resume();
     }
 }
@@ -331,9 +331,9 @@ void tracking_cross_pid(void)
         if (delta < 8000)
             angle = (delta + 2000) / (DELTA_MAX / 10);
         {
-            motor_setforward_left(STRAIGHTBASE_LEFT - delta);
-            motor_setforward_right(STRAIGHTBASE_RIGHT + delta);
-            servo_setangle(90 - angle);
+            motor_setforward_left(((int32_t)STRAIGHTBASE_LEFT - delta) & 0xffff);
+            motor_setforward_right(((int32_t)STRAIGHTBASE_RIGHT + delta) & 0xffff);
+            servo_setangle(((int32_t)90 - angle) & 0xffff);
         }
         // tracker_sendinfo();
         // printf("%d %d\r\n", delta, angle);
@@ -385,9 +385,9 @@ void tracking_final_pid(void)
         if (delta < 8000)
             angle = (delta + 2000) / (DELTA_MAX / 10);
         {
-            servo_setangle(90 - angle);
-            motor_setforward_left(STRAIGHTBASE_LEFT - delta);
-            motor_setforward_right(STRAIGHTBASE_RIGHT + delta);
+            motor_setforward_left(((int32_t)STRAIGHTBASE_LEFT - delta) & 0xffff);
+            motor_setforward_right(((int32_t)STRAIGHTBASE_RIGHT + delta) & 0xffff);
+            servo_setangle(((int32_t)90 - angle) & 0xffff);
         }
         // tracker_sendinfo();
         // printf("%d %d\r\n", delta, angle);

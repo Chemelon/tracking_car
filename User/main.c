@@ -38,7 +38,7 @@ int main(void)
     stop();
     servo_setangle(90);
     Delay_ms(800);
-#if 0
+#if 0  
     for (;;)
     {
         // printf("%d %d \r\n",TIM3->CNT,TIM4->CNT);
@@ -49,8 +49,8 @@ int main(void)
         Delay_ms(200);
     }
 #endif
-    tracking_straightfast_pid_sm(0xffff,7000);
-    while(1);
+    //tracking_straightfast_pid_sm(0xffff,7000,20000);
+    //while(1);
     func_caller();
     stateswitcher();
     for (int i = 0;; i +=10)

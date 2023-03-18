@@ -85,9 +85,9 @@ void tracking_crossright(void)
 {
     TRACKRIGHT90_LOG("RIGHT90IN");
     gostraight(0);
-    servo_setangle(150);
-    motor_setforward_left(STRAIGHTBASE_LEFT + 1000);
-    Delay_ms(80);
+    servo_setangle(143);
+    motor_setforward_left(STRAIGHTBASE_LEFT);
+    Delay_ms(65);
     for (;;)
     {
         if (ptracker_status->update == status_resloved)
@@ -98,10 +98,10 @@ void tracking_crossright(void)
         if (TRACKER4_STATUS == t_color_black && TRACKER1_STATUS == t_color_white)
         //if (TRACKER4_STATUS == t_color_black && (TRACKER5_STATUS == t_color_white || TRACKER1_STATUS == t_color_white))
         {
-            servo_setangle(90);
+            servo_setangle(85);
             motor_setforward_left(STRAIGHTBASE_LEFT);
             motor_setforward_right(STRAIGHTBASE_RIGHT);
-            Delay_ms(40);
+            Delay_ms(45);
             //brake();
             tracking_resume();
             TRACKRIGHT90_LOG("RIGHT90EXIT");
