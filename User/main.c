@@ -42,7 +42,7 @@ int main(void)
     {
         // printf("%d %d \r\n",TIM3->CNT,TIM4->CNT);
         // servo_set_dutyclcle(1500);
-        gostraight(0);
+        //gostraight(0);
         tracker_sendinfo();
         tracking_resume();
         Delay_ms(200);

@@ -3,9 +3,9 @@
 #include "usart.h"
 
 /* 寻线90度右转log开关 */
-#define DEBUG_TRACKRIGHT90 0
+#define DEBUG_TRACKRIGHT90 1
 /* 寻线90度左转log开关 */
-#define DEBUG_TRACKLEFT90 0
+#define DEBUG_TRACKLEFT90 1
 
 
 #if DEBUG_TRACKLEFT90
@@ -38,6 +38,7 @@
 
 void tracking_left(void);
 void tracking_right(void);
+void tracking_crossright(void);
 
 #endif
 

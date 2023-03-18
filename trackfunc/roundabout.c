@@ -80,24 +80,25 @@ void circle_in(roundabout_posit_type round_posit)
                 TIM3->CR1 &= ~TIM_CR1_CEN;
                 TIM3->CNT = 0;
                 /* 出弯时 */
+                brake();
                 //DEBUG_ACTIONSTOP;
                 break;
             }
-            if (TIM3->CNT > 8300)
+            if (TIM3->CNT > 8100)
             {
                 //DEBUG_ACTIONSTOP;
                 if (TRACKER4_STATUS == t_color_black || TRACKER3_STATUS == t_color_black)
                 {
                     /* 沿外圈循迹 出环 */
                     servo_setangle(93);
-                    motor_setforward_left(ROUND_LEFTBASE - 3000);
+                    motor_setforward_left(ROUND_LEFTBASE - 2500);
                     motor_setforward_right(ROUND_RIGHTBASE - 4000);
                 }
-                else if (TRACKER2_STATUS == t_color_white)
+                else //if (TRACKER2_STATUS == t_color_white)
                 {
                     /* 向内修正 */
                     servo_setangle(75);
-                    motor_setforward_right(ROUND_LEFTBASE - 2000);
+                    motor_setforward_right(ROUND_LEFTBASE - 1000);
                     motor_setforward_left(ROUND_LEFTBASE - 4000);
                 }
             }
@@ -154,66 +155,5 @@ void circle_in(roundabout_posit_type round_posit)
     }
 }
 
-/* 出环 */
-void circle_out(void)
-{
-    for (;;)
-    {
-        if (ptracker_status->update == status_resloved)
-        {
-            continue;
-        }
-        if (1 /* 出口条件 */)
-        {
-        }
-        tracking_resume();
-    }
-}
 
-/* 左转环岛 */
-void roundabout_left(void)
-{
-    servo_setangle(90);
-    for (;;)
-    {
-        if (ptracker_status->update == status_resloved)
-        {
-            continue;
-        }
-        if (1 /* 出口条件 */)
-        {
-            ROUNDABOUT_LOG("ROUNDABOUTEXIT\r\n");
-            tracking_resume();
-            servo_setangle(90);
-            brake();
-#if DEBUG_ROUNDABOUT
-            DEBUG_ACTIONSTOP;
-#endif
-            break;
-        }
-        if (1)
-        {
-        }
-        else if (1)
-        {
-        }
 
-        tracking_resume();
-    }
-}
-
-/* 右转环岛 */
-void roundabout_right(void)
-{
-    for (;;)
-    {
-        if (ptracker_status->update == status_resloved)
-        {
-            continue;
-        }
-        if (1 /* 出口条件 */)
-        {
-        }
-        tracking_resume();
-    }
-}

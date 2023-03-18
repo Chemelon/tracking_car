@@ -14,16 +14,21 @@ void tracking_straight(void)
         {
             continue;
         }
-        if (((TRACKER1_STATUS == t_color_black) || (TRACKER5_STATUS == t_color_black)) && ((TRACKER3_STATUS == t_color_white && (TRACKER3_STATUS + TRACKER4_STATUS) < 2)))
+        /* 出口条件 */
+        if ((TRACKER1_STATUS == t_color_black) || (TRACKER5_STATUS == t_color_black))
         {
-            brake();
-            tracking_resume();
-            servo_setangle(S_STRAIGHTWARD);
-            STRAIGHT_LOG("STRAITHTEXIT\r\n");
+            //tracker_sendinfo();
+            if (TRACKER3_STATUS == t_color_white)
+            {
+                brake();
+                tracking_resume();
+                servo_setangle(S_STRAIGHTWARD);
+                STRAIGHT_LOG("STRAITHTEXIT\r\n");
 #if DEBUG_STRAIGHT
-            DEBUG_ACTIONSTOP;
+                DEBUG_ACTIONSTOP;
 #endif
-            break;
+                break;
+            }
         }
         if (TRACKER4_STATUS == t_color_black)
         {
@@ -59,7 +64,7 @@ void tracking_cross(void)
         if (TRACKER1_STATUS + TRACKER2_STATUS + TRACKER3_STATUS + TRACKER4_STATUS + TRACKER5_STATUS > 2)
         {
             if (TRACKER3_STATUS == t_color_black)
-            // if (TRACKER2_STATUS == t_color_black && TRACKER3_STATUS == t_color_black && TRACKER4_STATUS == t_color_black)
+                // if (TRACKER2_STATUS == t_color_black && TRACKER3_STATUS == t_color_black && TRACKER4_STATUS == t_color_black)
             {
                 brake();
                 tracking_resume();
@@ -98,9 +103,10 @@ void tracking_cross(void)
 // 往右偏为正
 void tracking_straight_pid(void)
 {
-    pid_type_int straight_pid = {600, 4, 0};
+    pid_type_int straight_pid = {600, 5, 0};
     int32_t delta = 0, angle = 0;
     servo_setangle(S_STRAIGHTWARD);
+    STRAIGHT_LOG("STRAITHTIN\r\n");
     for (;;)
     {
         if (ptracker_status->update == status_resloved)
@@ -113,7 +119,9 @@ void tracking_straight_pid(void)
             if (TRACKER3_STATUS == t_color_white && (TRACKER2_STATUS == t_color_white || TRACKER4_STATUS == t_color_white))
             {
                 brake();
+
                 tracking_resume();
+                STRAIGHT_LOG("STRAITHTEXIT\r\n");
                 // DEBUG_ACTIONSTOP;
                 break;
             }
@@ -149,8 +157,9 @@ void tracking_straight_pid_s(uint16_t s)
     TIM3->CR1 &= ~TIM_CR1_CEN;
     TIM3->CNT = 0;
     TIM3->CR1 |= TIM_CR1_CEN;
-    pid_type_int straight_pid = {770, 6, 0};
+    pid_type_int straight_pid = {600, 5, 0};
     int32_t delta = 0, angle = 0;
+    STRAIGHT_LOG("STRAITHTIN\r\n");
     servo_setangle(S_STRAIGHTWARD);
     for (;;)
     {
@@ -160,16 +169,20 @@ void tracking_straight_pid_s(uint16_t s)
         }
         if (TIM3->CNT > s)
         {
+            STRAIGHT_LOG("S OK\r\n");
             /* 出口条件 */
             if ((TRACKER1_STATUS == t_color_black) || (TRACKER5_STATUS == t_color_black))
             {
-                if (TRACKER3_STATUS == t_color_white && (TRACKER2_STATUS == t_color_white || TRACKER4_STATUS == t_color_white))
+                tracker_sendinfo();
+                if (TRACKER3_STATUS == t_color_white)
+                    //if (TRACKER3_STATUS == t_color_white && (TRACKER2_STATUS == t_color_white || TRACKER4_STATUS == t_color_white))
                 {
                     /* 关闭定时器 */
                     TIM3->CR1 &= ~TIM_CR1_CEN;
                     TIM3->CNT = 0;
                     brake();
                     tracking_resume();
+                    STRAIGHT_LOG("STRAITHTEXIT\r\n");
                     // DEBUG_ACTIONSTOP;
                     break;
                 }
@@ -215,17 +228,18 @@ void tracking_cross_pid(void)
         {
             continue;
         }
-        if (TIM3->CNT > 320 && TRACKER3_STATUS == t_color_black)
-        // if (TRACKER1_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
+        if (TRACKER1_STATUS + TRACKER2_STATUS + TRACKER3_STATUS + TRACKER4_STATUS + TRACKER5_STATUS > 2)
+            //if (TIM3->CNT > 350 && TRACKER3_STATUS == t_color_black)
+            // if (TRACKER1_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
         {
-            // if (TRACKER3_STATUS == t_color_black)
+            if (TRACKER3_STATUS == t_color_black)
             {
                 /* 关闭定时器 */
                 TIM3->CR1 &= ~TIM_CR1_CEN;
                 TIM3->CNT = 0;
                 brake();
                 tracking_resume();
-                // DEBUG_ACTIONSTOP;
+                //DEBUG_ACTIONSTOP;
                 break;
             }
         }
@@ -244,9 +258,9 @@ void tracking_cross_pid(void)
         if (delta < 8000)
             angle = (delta + 2000) / (DELTA_MAX / 10);
         {
-            servo_setangle(90 - angle);
             motor_setforward_left(STRAIGHTBASE_LEFT - delta);
             motor_setforward_right(STRAIGHTBASE_RIGHT + delta);
+            servo_setangle(90 - angle);
         }
         // tracker_sendinfo();
         //printf("%d %d\r\n", delta, angle);
@@ -269,8 +283,8 @@ void tracking_final_pid(void)
         {
             continue;
         }
-        if (TIM3->CNT > 2600 && TRACKER3_STATUS == t_color_black )
-        //if (TRACKER1_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
+        if (TIM3->CNT > 2800 && TRACKER3_STATUS == t_color_black)
+            //if (TRACKER1_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
         {
             // if (TRACKER3_STATUS == t_color_black)
             {

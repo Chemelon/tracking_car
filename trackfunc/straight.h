@@ -3,7 +3,7 @@
 #include "usart.h"
 
 /* 直线循迹log开关 */
-#define DEBUG_STRAIGHT 1
+#define DEBUG_STRAIGHT 0
 
 #if DEBUG_STRAIGHT
 #define STRAIGHT_LOG(msg) Usart_SendString(DEBUG_USARTx, msg)

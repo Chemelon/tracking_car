@@ -84,25 +84,26 @@ void curve_out(void)
         {
             continue;
         }
-        if (TIM3->CNT > 2400 && (TRACKER1_STATUS + TRACKER5_STATUS > 0))
+        if (TIM3->CNT > 2000 && (TRACKER1_STATUS + TRACKER5_STATUS > 0))
         {
             /* 关闭定时器 */
             TIM3->CR1 &= ~TIM_CR1_CEN;
             TIM3->CNT = 0;
             tracking_resume();
+            gostraight(0);
             brake();
             STRAIGHT_LOG("CURVEEXIT\r\n");
 #if DEBUG_CURVE
-                //DEBUG_ACTIONSTOP;
+            //DEBUG_ACTIONSTOP;
 #endif
             break;
             
         }
-        if (TRACKER4_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
+        if (TRACKER3_STATUS == t_color_black || TRACKER4_STATUS == t_color_black)
         {
             /* 向内修正*/
-            servo_setangle(110);
-            motor_setforward_left(STRAIGHTBASE_LEFT + 3000);
+            servo_setangle(105);
+            motor_setforward_left(STRAIGHTBASE_LEFT + 3500);
             motor_setforward_right(STRAIGHTBASE_RIGHT - 1000);
             STRAIGHT_LOG("CURVE_IN\r\n");
         }

@@ -495,42 +495,46 @@ void func_caller(void)
     tracking_straight_pid_s(1000);
     tracking_left();
 
-    pid_integral = -4500; 
+    pid_integral = -3500; 
     tracking_cross_pid();
-    Delay_ms(50);
-    tracking_right();
+    //Delay_ms(40);
+    tracking_crossright();
+    //DEBUG_ACTIONSTOP;
 
-    pid_integral = 4500;
-    tracking_straight_pid();
+    pid_integral = 4700;
+    tracking_straight_pid_s(150);
     tracking_right();
-    pid_integral = 4500; 
+    pid_integral = 3500; 
     tracking_straight_pid();
     tracking_left();
-    pid_integral = -4500; 
+    pid_integral = -3500; 
     tracking_straight_pid();
     tracking_left();
     
     beforeround();
     circle_in(posit_left);
-    pid_integral = -2000;
+    Delay_ms(1000);
+    pid_integral = -100;
     tracking_straight_pid();
     
     tracking_left();
-    pid_integral = -4500; 
+    pid_integral = -3500; 
     tracking_straight_pid();
     tracking_left();
     
-    tracking_cross();
+    pid_integral = -3500; 
+    tracking_cross_pid();
+    tracking_crossright();
+    //tracking_right();
+    
+    pid_integral = 3700;
+    tracking_straight_pid_s(5000);
+    
     tracking_right();
-    
-    pid_integral = 7000;
-    tracking_straight_pid_s(2000);
-    
-    tracking_right();
-    pid_integral = 4500; 
+    pid_integral = 3500; 
     tracking_straight_pid();
     tracking_left();
-    pid_integral = -4500; 
+    pid_integral = -3500; 
     tracking_straight_pid();
     tracking_left();
 
@@ -538,10 +542,10 @@ void func_caller(void)
     curve_out();
     
     tracking_left();
-    pid_integral = -4500;
+    pid_integral = -3500;
     tracking_straight_pid();
     tracking_left();
-    pid_integral = -4500; 
+    pid_integral = -3500; 
     tracking_final_pid();
     
     stop();

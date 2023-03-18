@@ -35,7 +35,7 @@ void tracking_left(void)
             tracking_resume();
             TRACKLEFT90_LOG("LEFT90EXIT");
 #if DEBUG_TRACKLEFT90
-            DEBUG_ACTIONSTOP;
+            //DEBUG_ACTIONSTOP;
 #endif
             break;
         }
@@ -67,16 +67,51 @@ void tracking_right(void)
         if (TRACKER4_STATUS == t_color_black && TRACKER1_STATUS == t_color_white && TRACKER5_STATUS == t_color_white)
         {
             servo_setangle(65);
-            motor_setforward_right(RIGHTTURNBASE_RIGHT);
-            motor_setforward_left(RIGHTTURNBASE_LEFT);
+            //motor_setforward_right(RIGHTTURNBASE_RIGHT);
+            //motor_setforward_left(RIGHTTURNBASE_LEFT);
             brake();
             tracking_resume();
             TRACKRIGHT90_LOG("RIGHT90EXIT");
 #if DEBUG_TRACKRIGHT90
-            DEBUG_ACTIONSTOP;
+            //DEBUG_ACTIONSTOP;
 #endif
             break;
         }
         tracking_resume();
     }
 }
+
+void tracking_crossright(void)
+{
+    TRACKRIGHT90_LOG("RIGHT90IN");
+    gostraight(0);
+    servo_setangle(150);
+    motor_setforward_left(STRAIGHTBASE_LEFT + 1000);
+    Delay_ms(80);
+    for (;;)
+    {
+        if (ptracker_status->update == status_resloved)
+        {
+            continue;
+        }
+        /* 中心和靠外圈的光电均为黑色退出转弯模式 */
+        if (TRACKER4_STATUS == t_color_black && TRACKER1_STATUS == t_color_white)
+        //if (TRACKER4_STATUS == t_color_black && (TRACKER5_STATUS == t_color_white || TRACKER1_STATUS == t_color_white))
+        {
+            servo_setangle(90);
+            motor_setforward_left(STRAIGHTBASE_LEFT);
+            motor_setforward_right(STRAIGHTBASE_RIGHT);
+            Delay_ms(30);
+            //brake();
+            tracking_resume();
+            TRACKRIGHT90_LOG("RIGHT90EXIT");
+#if DEBUG_TRACKRIGHT90
+            //DEBUG_ACTIONSTOP;
+#endif
+            break;
+        }
+        tracking_resume();
+    }
+}
+
+
