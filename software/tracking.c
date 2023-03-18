@@ -497,9 +497,7 @@ void func_caller(void)
 
     pid_integral = -3500; 
     tracking_cross_pid();
-    //Delay_ms(40);
     tracking_crossright();
-    //DEBUG_ACTIONSTOP;
 
     pid_integral = 4700;
     tracking_straight_pid_s(150);

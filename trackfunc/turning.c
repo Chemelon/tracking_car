@@ -101,7 +101,7 @@ void tracking_crossright(void)
             servo_setangle(90);
             motor_setforward_left(STRAIGHTBASE_LEFT);
             motor_setforward_right(STRAIGHTBASE_RIGHT);
-            Delay_ms(30);
+            Delay_ms(40);
             //brake();
             tracking_resume();
             TRACKRIGHT90_LOG("RIGHT90EXIT");

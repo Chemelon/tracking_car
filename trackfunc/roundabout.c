@@ -139,6 +139,7 @@ void circle_in(roundabout_posit_type round_posit)
             /* 出口条件 */
             if (TRACKER1_STATUS == t_color_black)
             {
+                break;
             }
             if (TRACKER1_STATUS == t_color_black)
             {

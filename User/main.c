@@ -37,6 +37,7 @@ int main(void)
     Usart_SendString(DEBUG_USARTx, "system inited\r\n");
     stop();
     servo_setangle(90);
+    Delay_ms(800);
 #if 0
     for (;;)
     {
@@ -48,6 +49,8 @@ int main(void)
         Delay_ms(200);
     }
 #endif
+    tracking_straightfast_pid_sm(0xffff,4000);
+    while(1);
     func_caller();
     stateswitcher();
     for (int i = 0;; i +=10)

@@ -120,52 +120,5 @@ void curve_out(void)
     }
 }
 
-void curve_end(void)
-{
-    for (;;)
-    {
-        if (ptracker_status->update == status_resloved)
-        {
-            continue;
-        }
-        if (TRACKER1_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
-        {
-            /* 关闭定时器 */
-            TIM3->CR1 &= ~TIM_CR1_CEN;
-            TIM3->CNT = 0;
-            tracking_resume();
-            brake();
-            
-                STRAIGHT_LOG("CURVEEXIT\r\n");
-#if DEBUG_CURVE
-                DEBUG_ACTIONSTOP;
-#endif
-                break;
-            
-        }
-        if (TRACKER4_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
-        {
-            /* 向内修正*/
-            servo_setangle(110);
-            motor_setforward_left(STRAIGHTBASE_LEFT + 3000);
-            motor_setforward_right(STRAIGHTBASE_RIGHT - 1000);
-            STRAIGHT_LOG("CURVE_IN\r\n");
-        }
-        else if (TRACKER1_STATUS == t_color_black)
-        {
-            /* 向外修正*/
-            servo_setangle(85);
-            motor_setforward_left(STRAIGHTBASE_LEFT);
-            motor_setforward_right(STRAIGHTBASE_RIGHT + 1000);
-            STRAIGHT_LOG("CURVE_OUT\r\n");
-        }
-        tracking_resume();
-    }
-
-
-
-
-
-}
 
 
