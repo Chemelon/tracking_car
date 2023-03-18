@@ -4,5 +4,8 @@
 
 #define DEBUG_CURVE 1
 
+void before_curve(void);
+void curve_out(void);
+
 #endif
 

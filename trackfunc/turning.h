@@ -15,7 +15,7 @@
 #endif
 #define S_LEFT90 48
 /* 向左转直角弯时差速PWM值 即右比左快的值 CCMR 最大值2000*/
-#define LEFTTURN_ADD 1500
+#define LEFTTURN_ADD 3000
 /* 向左转直角弯时差速PWM值 即左比右慢的值 */
 #define LEFTTURN_SUB 1000
 #define LEFTTURNBASE_LEFT STRAIGHTBASE_LEFT

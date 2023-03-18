@@ -5,8 +5,121 @@
 #include "motor.h"
 #include "curve-8.h"
 
-/* 出口条件不同的直线循迹函数 */
 void before_curve(void)
+{
+    /* 启动定时器 */
+    TIM3->CR1 &= ~TIM_CR1_CEN;
+    TIM3->CNT = 0;
+    TIM3->CR1 |= TIM_CR1_CEN;
+    gostraight(0);
+    for (;;)
+    {
+        if (ptracker_status->update == status_resloved)
+        {
+            continue;
+        }
+        if (TIM3->CNT > 3800)
+        {
+            /* 关闭定时器 */
+            TIM3->CR1 &= ~TIM_CR1_CEN;
+            TIM3->CNT = 0;
+            brake();
+            tracking_resume();
+            servo_setangle(90);
+            STRAIGHT_LOG("CURVEEXIT\r\n");
+#if DEBUG_CURVE
+            //DEBUG_ACTIONSTOP;
+#endif
+            break;
+        }
+        if (TRACKER5_STATUS == t_color_black)
+        {
+            /* 向外修正*/
+            servo_setangle(115);
+            motor_setforward_left(STRAIGHTBASE_LEFT + 3000);
+            motor_setforward_right(STRAIGHTBASE_RIGHT - 1000);
+            STRAIGHT_LOG("RIGHTWARD\r\n");
+        }
+        // STRAIGHT_LOG("UPDATED\r\n");
+        else if (TRACKER4_STATUS == t_color_black)
+        {
+            /* 向外修正*/
+            servo_setangle(92);
+            motor_setforward_left(STRAIGHTBASE_LEFT);
+            motor_setforward_right(STRAIGHTBASE_RIGHT);
+            STRAIGHT_LOG("RIGHTWARD\r\n");
+        }
+        else if (TRACKER1_STATUS == t_color_black)
+        {
+            /* 向内修正*/
+            servo_setangle(65);
+            motor_setforward_left(STRAIGHTBASE_LEFT - 1000);
+            motor_setforward_right(STRAIGHTBASE_RIGHT + 3500);
+            STRAIGHT_LOG("LEFTWARD\r\n");
+        }
+        else if (TIM3->CNT > 500 && TRACKER2_STATUS == t_color_black)
+        {
+            /* 向内修正*/
+            servo_setangle(80);
+            motor_setforward_left(STRAIGHTBASE_LEFT - 1000);
+            motor_setforward_right(STRAIGHTBASE_RIGHT + 1000);
+            STRAIGHT_LOG("LEFTWARD\r\n");
+
+        }
+        // STRAIGHT_LOG("STRAIGHTING\r\n");
+        tracking_resume();
+    }
+}
+
+void curve_out(void)
+{
+    /* 启动定时器 */
+    TIM3->CR1 &= ~TIM_CR1_CEN;
+    TIM3->CNT = 0;
+    TIM3->CR1 |= TIM_CR1_CEN;
+    gostraight(0);
+    for (;;)
+    {
+        if (ptracker_status->update == status_resloved)
+        {
+            continue;
+        }
+        if (TIM3->CNT > 2400 && (TRACKER1_STATUS + TRACKER5_STATUS > 0))
+        {
+            /* 关闭定时器 */
+            TIM3->CR1 &= ~TIM_CR1_CEN;
+            TIM3->CNT = 0;
+            tracking_resume();
+            brake();
+            STRAIGHT_LOG("CURVEEXIT\r\n");
+#if DEBUG_CURVE
+                //DEBUG_ACTIONSTOP;
+#endif
+            break;
+            
+        }
+        if (TRACKER4_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
+        {
+            /* 向内修正*/
+            servo_setangle(110);
+            motor_setforward_left(STRAIGHTBASE_LEFT + 3000);
+            motor_setforward_right(STRAIGHTBASE_RIGHT - 1000);
+            STRAIGHT_LOG("CURVE_IN\r\n");
+        }
+        else //if (TRACKER1_STATUS == t_color_black)
+        {
+            /* 向外修正*/
+            servo_setangle(85);
+            motor_setforward_left(STRAIGHTBASE_LEFT);
+            motor_setforward_right(STRAIGHTBASE_RIGHT + 1000);
+            STRAIGHT_LOG("CURVE_OUT\r\n");
+        }
+        // STRAIGHT_LOG("STRAIGHTING\r\n");
+        tracking_resume();
+    }
+}
+
+void curve_end(void)
 {
     for (;;)
     {
@@ -14,35 +127,44 @@ void before_curve(void)
         {
             continue;
         }
-        if (TIM3->CNT > 3000)
+        if (TRACKER1_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
         {
-            brake();
+            /* 关闭定时器 */
+            TIM3->CR1 &= ~TIM_CR1_CEN;
+            TIM3->CNT = 0;
             tracking_resume();
-            servo_setangle(90);
-            STRAIGHT_LOG("CURVEEXIT\r\n");
+            brake();
+            
+                STRAIGHT_LOG("CURVEEXIT\r\n");
 #if DEBUG_CURVE
-            DEBUG_ACTIONSTOP;
+                DEBUG_ACTIONSTOP;
 #endif
-            break;
+                break;
+            
         }
-        // STRAIGHT_LOG("UPDATED\r\n");
-        if (TRACKER4_STATUS == t_color_black)
+        if (TRACKER4_STATUS == t_color_black || TRACKER5_STATUS == t_color_black)
         {
-            /* 偏左 向右修正*/
-            servo_setangle(95);
-            motor_setforward_left(STRAIGHTBASE_LEFT + 2000);
-            motor_setforward_right(STRAIGHTBASE_RIGHT);
-            STRAIGHT_LOG("RIGHTWARD\r\n");
+            /* 向内修正*/
+            servo_setangle(110);
+            motor_setforward_left(STRAIGHTBASE_LEFT + 3000);
+            motor_setforward_right(STRAIGHTBASE_RIGHT - 1000);
+            STRAIGHT_LOG("CURVE_IN\r\n");
         }
-        else if (TRACKER2_STATUS == t_color_black)
+        else if (TRACKER1_STATUS == t_color_black)
         {
-            /* 偏右 向左修正*/
+            /* 向外修正*/
             servo_setangle(85);
             motor_setforward_left(STRAIGHTBASE_LEFT);
-            motor_setforward_right(STRAIGHTBASE_RIGHT + 2000);
-            STRAIGHT_LOG("LEFTWARD\r\n");
+            motor_setforward_right(STRAIGHTBASE_RIGHT + 1000);
+            STRAIGHT_LOG("CURVE_OUT\r\n");
         }
-        STRAIGHT_LOG("STRAIGHTING\r\n");
         tracking_resume();
     }
+
+
+
+
+
 }
+
+

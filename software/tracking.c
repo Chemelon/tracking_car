@@ -492,13 +492,12 @@ void stateswitcher(void)
 
 void func_caller(void)
 {    
-    tracking_straight_pid();
+    tracking_straight_pid_s(1000);
     tracking_left();
 
     pid_integral = -4500; 
     tracking_cross_pid();
     Delay_ms(50);
-    //tracking_cross();
     tracking_right();
 
     pid_integral = 4500;
@@ -521,7 +520,6 @@ void func_caller(void)
     tracking_straight_pid();
     tracking_left();
     
-    //pid_integral = -4500; 
     tracking_cross();
     tracking_right();
     
@@ -535,8 +533,16 @@ void func_caller(void)
     pid_integral = -4500; 
     tracking_straight_pid();
     tracking_left();
-    pid_integral = -4500; 
+
+    before_curve();
+    curve_out();
+    
+    tracking_left();
+    pid_integral = -4500;
     tracking_straight_pid();
+    tracking_left();
+    pid_integral = -4500; 
+    tracking_final_pid();
     
     stop();
     while (1)

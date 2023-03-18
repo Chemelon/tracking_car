@@ -11,11 +11,12 @@ void tracking_left(void)
     servo_setangle(S_LEFT90);
     motor_setforward_right(RIGHTTURNBASE_RIGHT + LEFTTURN_ADD);
     motor_setbrake_left();
-    motor_setbackward_left(LEFTTURNBASE_LEFT + 2000);
+    motor_setbackward_left(LEFTTURNBASE_LEFT + 3000);
     Delay_ms(25);
     motor_setbrake_left();
+    motor_setforward_right(RIGHTTURNBASE_RIGHT);
     motor_setforward_left(LEFTTURNBASE_LEFT + 3000);
-    Delay_ms(70);
+    Delay_ms(55);
 
     for (;;)
     {
