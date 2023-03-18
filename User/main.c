@@ -49,7 +49,7 @@ int main(void)
         Delay_ms(200);
     }
 #endif
-    tracking_straightfast_pid_sm(0xffff,4000);
+    tracking_straightfast_pid_sm(0xffff,7000);
     while(1);
     func_caller();
     stateswitcher();
