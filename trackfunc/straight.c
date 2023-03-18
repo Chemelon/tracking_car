@@ -214,7 +214,7 @@ void tracking_straight_pid_s(uint16_t s)
     }
 }
 
-pid_type_int independent_pid = {15, 7, 1, 7000, -7000, 0};
+pid_type_int independent_pid = {22, 5, 10, 8500, -8500, 0};
 #define NEW_MAX 12000
 /* 按距离屏蔽光电 且巡线固定距离的高速PID巡线 */
 void tracking_straightfast_pid_sm(uint16_t s, uint16_t m, int32_t basespeed)
@@ -273,7 +273,7 @@ void tracking_straightfast_pid_sm(uint16_t s, uint16_t m, int32_t basespeed)
         {
             delta = (-NEW_MAX);
         }
-        angle = delta / (NEW_MAX / 30);
+        angle = delta / (NEW_MAX / 25);
         // if (delta > 8000)
         //     angle = (delta - 2000) / (NEW_MAX / 15);
         // if (delta < 8000)

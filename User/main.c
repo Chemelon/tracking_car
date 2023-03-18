@@ -6,6 +6,7 @@
 #include "usart.h"
 #include "motor.h"
 #include "encoder.h"
+//11.77
 
 #define GPIOB_IDR_BIT3 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 3 * 4))
 #define GPIOB_IDR_BIT4 (*(uint32_t *)(0x42000000 + (GPIOB_BASE + 0x08 - 0x40000000) * 32 + 4 * 4))
@@ -49,7 +50,7 @@ int main(void)
         Delay_ms(200);
     }
 #endif
-    //tracking_straightfast_pid_sm(0xffff,7000,20000);
+    //tracking_straightfast_pid_sm(0xffff,7000,22000);
     //while(1);
     func_caller();
     stateswitcher();

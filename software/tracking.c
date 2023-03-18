@@ -511,7 +511,7 @@ void func_caller(void)
     
     beforeround();
     circle_in(posit_left);
-    Delay_ms(1000);
+    //Delay_ms(1000);
     pid_integral = -200;
     tracking_straight_pid();
     

@@ -73,7 +73,7 @@ void circle_in(roundabout_posit_type round_posit)
                 continue;
             }
             /* 出口条件 */
-            if ((TIM3->CNT > 9350) && TRACKER3_STATUS == t_color_black)
+            if ((TIM3->CNT > 9400) && TRACKER3_STATUS == t_color_black)
             {
                 tracking_resume();
                 /* 关闭定时器 */
@@ -90,16 +90,16 @@ void circle_in(roundabout_posit_type round_posit)
                 if (TRACKER4_STATUS == t_color_black || TRACKER3_STATUS == t_color_black)
                 {
                     /* 沿外圈循迹 出环 */
-                    servo_setangle(93);
+                    servo_setangle(92);
                     motor_setforward_left(ROUND_LEFTBASE - 2500);
                     motor_setforward_right(ROUND_RIGHTBASE - 4000);
                 }
                 else //if (TRACKER2_STATUS == t_color_white)
                 {
                     /* 向内修正 */
-                    servo_setangle(77);
-                    motor_setforward_right(ROUND_LEFTBASE - 1000);
-                    motor_setforward_left(ROUND_LEFTBASE - 4000);
+                    servo_setangle(78);
+                    motor_setforward_right(ROUND_LEFTBASE - 1500);
+                    motor_setforward_left(ROUND_LEFTBASE - 3500);
                 }
             }
             else
