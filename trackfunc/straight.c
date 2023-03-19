@@ -101,10 +101,14 @@ void tracking_cross(void)
 /* 直线循迹pid */
 #define DELTA_MAX 12000
 // 往右偏为正
-void tracking_straight_pid(void)
+void tracking_straight_pid(uint16_t m)
 {
     pid_type_int straight_pid = {600, 5, 0};
     int32_t delta = 0, angle = 0;
+    /* 启动定时器 */
+    TIM3->CR1 &= ~TIM_CR1_CEN;
+    TIM3->CNT = 0;
+    TIM3->CR1 |= TIM_CR1_CEN;
     servo_setangle(S_STRAIGHTWARD);
     STRAIGHT_LOG("STRAITHTIN\r\n");
     for (;;)
@@ -113,13 +117,22 @@ void tracking_straight_pid(void)
         {
             continue;
         }
-
+        if (TIM3->CNT > m)
+        {
+            /* 关闭定时器 */
+            TIM3->CR1 &= ~TIM_CR1_CEN;
+            TIM3->CNT = 0;
+            brake();
+            tracking_resume();
+            STRAIGHT_LOG("STRAITHTEXIT\r\n");
+            // DEBUG_ACTIONSTOP;
+            break;
+        }
         if ((TRACKER1_STATUS == t_color_black) || (TRACKER5_STATUS == t_color_black))
         {
             if (TRACKER3_STATUS == t_color_white && (TRACKER2_STATUS == t_color_white || TRACKER4_STATUS == t_color_white))
             {
                 brake();
-
                 tracking_resume();
                 STRAIGHT_LOG("STRAITHTEXIT\r\n");
                 // DEBUG_ACTIONSTOP;
@@ -214,7 +227,7 @@ void tracking_straight_pid_s(uint16_t s)
     }
 }
 
-pid_type_int independent_pid = {27, 7, 17, 10000, -10000, 0};
+pid_type_int independent_pid = {30, 7, 17, 10000, -10000, 0};
 #define NEW_MAX 12000
 /* 按距离屏蔽光电 且巡线固定距离的高速PID巡线 */
 void tracking_straightfast_pid_sm(uint16_t s, uint16_t m, int32_t basespeed)
@@ -243,7 +256,7 @@ void tracking_straightfast_pid_sm(uint16_t s, uint16_t m, int32_t basespeed)
             brake();
             tracking_resume();
             STRAIGHT_LOG("STRAITHTEXIT\r\n");
-            //DEBUG_ACTIONSTOP;
+            // DEBUG_ACTIONSTOP;
             break;
         }
         /* 屏蔽结束 */
