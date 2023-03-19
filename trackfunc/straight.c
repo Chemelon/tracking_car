@@ -243,7 +243,7 @@ void tracking_straightfast_pid_sm(uint16_t s, uint16_t m, int32_t basespeed)
             brake();
             tracking_resume();
             STRAIGHT_LOG("STRAITHTEXIT\r\n");
-            DEBUG_ACTIONSTOP;
+            //DEBUG_ACTIONSTOP;
             break;
         }
         /* 屏蔽结束 */

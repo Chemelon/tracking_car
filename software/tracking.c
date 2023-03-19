@@ -540,10 +540,10 @@ void func_caller(void)
     curve_out();
     
     tracking_left();
-    pid_integral = -3500;
-    tracking_straight_pid();
+    pid_integral = -900;
+    tracking_straight_pid_s(5);
     tracking_left();
-    pid_integral = -3500; 
+    pid_integral = -2000; 
     tracking_final_pid();
     
     stop();
