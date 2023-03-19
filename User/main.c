@@ -50,8 +50,8 @@ int main(void)
         Delay_ms(200);
     }
 #endif
-    //tracking_straightfast_pid_sm(0xffff,7000,22000);
-    //while(1);
+    tracking_straightfast_pid_sm(0xffff,7000,22000);
+    while(1);
     func_caller();
     stateswitcher();
     for (int i = 0;; i +=10)

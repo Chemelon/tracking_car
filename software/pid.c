@@ -62,7 +62,7 @@ int32_t positional_pid_int_independent(pid_type_int *pid_this, int32_t target, i
 	{
 		cnt = 0;
 		pid_this->i = 0;
-        err_priv = 0;
+        //err_priv = 0;
 	}
 	pid_delta = (kp * pid_err) + (ki * pid_this->i) + (kd * (pid_err - err_priv));
 

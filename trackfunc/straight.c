@@ -214,7 +214,7 @@ void tracking_straight_pid_s(uint16_t s)
     }
 }
 
-pid_type_int independent_pid = {22, 5, 10, 8500, -8500, 0};
+pid_type_int independent_pid = {27, 7, 17, 10000, -10000, 0};
 #define NEW_MAX 12000
 /* 按距离屏蔽光电 且巡线固定距离的高速PID巡线 */
 void tracking_straightfast_pid_sm(uint16_t s, uint16_t m, int32_t basespeed)

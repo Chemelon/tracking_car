@@ -90,7 +90,7 @@ void circle_in(roundabout_posit_type round_posit)
                 if (TRACKER4_STATUS == t_color_black || TRACKER3_STATUS == t_color_black)
                 {
                     /* 沿外圈循迹 出环 */
-                    servo_setangle(92);
+                    servo_setangle(91);
                     motor_setforward_left(ROUND_LEFTBASE - 2500);
                     motor_setforward_right(ROUND_RIGHTBASE - 4000);
                 }
