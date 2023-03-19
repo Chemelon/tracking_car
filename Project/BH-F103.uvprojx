@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Libraries\CMSIS;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\User;..\hardware;..\software</IncludePath>
+              <IncludePath>..\Libraries\CMSIS;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\User;..\hardware;..\software;..\trackfunc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -616,6 +616,11 @@
               <FileType>1</FileType>
               <FilePath>..\hardware\motor.c</FilePath>
             </File>
+            <File>
+              <FileName>encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\hardware\encoder.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -630,6 +635,36 @@
               <FileName>tracking.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\software\tracking.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\software\pid.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>TRACK</GroupName>
+          <Files>
+            <File>
+              <FileName>curve-8.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\trackfunc\curve-8.c</FilePath>
+            </File>
+            <File>
+              <FileName>roundabout.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\trackfunc\roundabout.c</FilePath>
+            </File>
+            <File>
+              <FileName>straight.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\trackfunc\straight.c</FilePath>
+            </File>
+            <File>
+              <FileName>turning.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\trackfunc\turning.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1245,6 +1280,11 @@
               <FileType>1</FileType>
               <FilePath>..\hardware\motor.c</FilePath>
             </File>
+            <File>
+              <FileName>encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\hardware\encoder.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1259,6 +1299,36 @@
               <FileName>tracking.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\software\tracking.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\software\pid.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>TRACK</GroupName>
+          <Files>
+            <File>
+              <FileName>curve-8.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\trackfunc\curve-8.c</FilePath>
+            </File>
+            <File>
+              <FileName>roundabout.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\trackfunc\roundabout.c</FilePath>
+            </File>
+            <File>
+              <FileName>straight.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\trackfunc\straight.c</FilePath>
+            </File>
+            <File>
+              <FileName>turning.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\trackfunc\turning.c</FilePath>
             </File>
           </Files>
         </Group>
